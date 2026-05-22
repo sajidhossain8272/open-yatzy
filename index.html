@@ -35,13 +35,10 @@
     <!-- Setup Screen -->
     <div id="setup-screen" class="setup-screen">
       <div class="setup-card" style="position: relative;">
-        <!-- Theme & Rules Buttons -->
+        <!-- Rules Button -->
         <div style="position: absolute; top: 16px; right: 16px; display: flex; gap: 8px;">
           <button id="btn-rules-setup" class="btn-header" title="Rules & Guide" style="border: 1.5px solid var(--color-border); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: transparent;">
             <span class="material-symbols-outlined" style="font-size: 20px;">help</span>
-          </button>
-          <button id="btn-theme-toggle-setup" class="btn-header" title="Toggle Theme" style="border: 1.5px solid var(--color-border); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: transparent;">
-            <span class="material-symbols-outlined" style="font-size: 20px;">light_mode</span>
           </button>
         </div>
 
@@ -51,21 +48,12 @@
         <p style="color: var(--color-text-secondary); text-align: center; font-size: 12px; max-width: 320px; margin: 0 auto 12px auto; line-height: 1.4;">
           open-games.app is the parent name who builds open-source games without ads. Play now free!
         </p>
-        
-        <div style="margin-top: 10px;">
-          <h2>NUMBER OF PLAYERS</h2>
-          <div class="player-count-buttons" style="margin-top: 10px;">
-            <button class="btn-count active" data-count="1">1</button>
-            <button class="btn-count" data-count="2">2</button>
-            <button class="btn-count" data-count="3">3</button>
-            <button class="btn-count" data-count="4">4</button>
-          </div>
-        </div>
 
         <div style="margin-top: 10px;">
           <h2>PLAYER NAMES</h2>
           <div id="player-names-container" class="name-input-group" style="margin-top: 10px;">
             <input type="text" class="input-field" id="input-p1" value="Player 1" placeholder="Player 1 Name">
+            <input type="text" class="input-field" id="input-p2" value="Player 2" placeholder="Player 2 Name">
           </div>
         </div>
 
@@ -85,62 +73,65 @@
 
     <!-- Game Screen -->
     <div id="game-screen" class="game-screen" style="display: none;">
-      <!-- Header -->
-      <header>
-        <button id="btn-back" class="btn-header" title="Back to Menu" style="display: inline-flex;">
-          <span class="material-symbols-outlined">arrow_back</span>
-        </button>
-        <div class="header-brand">
-          <img src="assets/images/logo.png" alt="YATZY! Logo" class="header-logo">
-          <h1>YATZY!</h1>
+      <div id="game-board-card" class="game-board-card">
+        <!-- Semi-circle tabs -->
+        <div id="tab-round" class="tab-round">R • 1</div>
+        <div id="tab-exit" class="tab-exit">EXIT</div>
+
+        <!-- Header -->
+        <header>
+          <button id="btn-back" class="btn-header" title="Back to Menu" style="display: inline-flex;">
+            <span class="material-symbols-outlined">arrow_back</span>
+          </button>
+          <div class="header-brand">
+            <img src="assets/images/logo.png" alt="YATZY! Logo" class="header-logo">
+            <h1>YATZY!</h1>
+          </div>
+          <div class="header-buttons" style="margin-left: auto;">
+            <button id="btn-rules" class="btn-header" title="Rules & Guide">
+              <span class="material-symbols-outlined">help</span>
+            </button>
+            <button id="btn-reset" class="btn-header" title="Reset Game">
+              <span class="material-symbols-outlined">refresh</span>
+            </button>
+            <button id="btn-login" class="btn-header" title="Login">
+              <span class="material-symbols-outlined">login</span>
+            </button>
+            <span id="user-display" style="display:none; font-size: 13px; font-weight: bold; color: var(--color-accent-gold);"></span>
+            <button id="btn-leaderboard" class="btn-header" title="Leaderboard">
+              <span class="material-symbols-outlined">leaderboard</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- Active Turn Indicator -->
+        <div id="turn-strip" class="turn-strip">
+          <span class="material-symbols-outlined">person</span>
+          <span id="active-player-name">TURN: PLAYER 1</span>
         </div>
-        <div class="header-buttons" style="margin-left: auto;">
-          <button id="btn-rules" class="btn-header" title="Rules & Guide">
-            <span class="material-symbols-outlined">help</span>
-          </button>
-          <button id="btn-theme-toggle-game" class="btn-header" title="Toggle Theme">
-            <span class="material-symbols-outlined">light_mode</span>
-          </button>
-          <button id="btn-reset" class="btn-header" title="Reset Game">
-            <span class="material-symbols-outlined">refresh</span>
-          </button>
-          <button id="btn-login" class="btn-header" title="Login">
-            <span class="material-symbols-outlined">login</span>
-          </button>
-          <span id="user-display" style="display:none; font-size: 13px; font-weight: bold; color: var(--color-accent-gold);"></span>
-          <button id="btn-leaderboard" class="btn-header" title="Leaderboard">
-            <span class="material-symbols-outlined">leaderboard</span>
-          </button>
+
+        <!-- Scorecard Table Wrapper -->
+        <div class="scorecard-section">
+          <div id="scorecard-table-container">
+            <!-- Dynamic Scorecard Table will be injected here -->
+          </div>
         </div>
-      </header>
 
-      <!-- Active Turn Indicator -->
-      <div id="turn-strip" class="turn-strip">
-        <span class="material-symbols-outlined">person</span>
-        <span id="active-player-name">TURN: PLAYER 1</span>
-      </div>
-
-      <!-- Canvas Dice Arena -->
-      <div class="canvas-container">
-        <canvas id="game-canvas"></canvas>
-      </div>
-
-      <!-- Play Turn Status & Roll Button -->
-      <div class="control-bar">
-        <div class="status-info">
-          <span id="rolls-remaining" class="status-rolls">ROLLS REMAINING: 3/3</span>
-          <span id="status-desc" class="status-desc">Roll dice to begin!</span>
+        <!-- Canvas Dice Arena -->
+        <div class="canvas-container">
+          <canvas id="game-canvas"></canvas>
         </div>
-        <button id="btn-roll" class="btn-roll">
-          <span class="material-symbols-outlined">casino</span>
-          ROLL DICE
-        </button>
-      </div>
 
-      <!-- Scorecard Table Wrapper -->
-      <div class="scorecard-section">
-        <div id="scorecard-table-container">
-          <!-- Dynamic Scorecard Table will be injected here -->
+        <!-- Play Turn Status & Roll Button -->
+        <div class="control-bar">
+          <div class="status-info">
+            <span id="rolls-remaining" class="status-rolls">ROLLS REMAINING: 3/3</span>
+            <span id="status-desc" class="status-desc">Roll dice to begin!</span>
+          </div>
+          <button id="btn-roll" class="btn-roll">
+            <span class="material-symbols-outlined">casino</span>
+            ROLL DICE
+          </button>
         </div>
       </div>
     </div>

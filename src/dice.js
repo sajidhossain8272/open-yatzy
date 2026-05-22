@@ -62,7 +62,7 @@ export class DiceComponent {
     }
   }
 
-  draw(ctx) {
+  draw(ctx, unrolled = false) {
     ctx.save();
     
     // Move to center of die
@@ -74,12 +74,12 @@ export class DiceComponent {
 
     const hs = this.size / 2;
 
-    // Fetch dynamic colors from the page styles (allows dark/light theme switching!)
+    // Fetch dynamic colors from the page styles
     const bodyStyle = getComputedStyle(document.body);
-    const bgStart = bodyStyle.getPropertyValue('--color-dice-bg-start').trim() || '#FFD54F';
-    const bgEnd = bodyStyle.getPropertyValue('--color-dice-bg-end').trim() || '#FFB300';
-    const dicePips = bodyStyle.getPropertyValue('--color-dice-pips').trim() || '#091711';
-    const diceBorder = bodyStyle.getPropertyValue('--color-dice-border').trim() || 'rgba(255, 255, 255, 0.3)';
+    const bgStart = unrolled ? '#202430' : (bodyStyle.getPropertyValue('--color-dice-bg-start').trim() || '#FFFFFF');
+    const bgEnd = unrolled ? '#202430' : (bodyStyle.getPropertyValue('--color-dice-bg-end').trim() || '#F1F2F6');
+    const dicePips = bodyStyle.getPropertyValue('--color-dice-pips').trim() || '#2C3E50';
+    const diceBorder = unrolled ? 'rgba(255, 255, 255, 0.1)' : (bodyStyle.getPropertyValue('--color-dice-border').trim() || 'rgba(0, 0, 0, 0.1)');
     const goldAccent = bodyStyle.getPropertyValue('--color-accent-gold').trim() || '#FBBC05';
 
     // 1. Drop shadow (draw shifted round rect)
@@ -95,7 +95,7 @@ export class DiceComponent {
     ctx.restore();
 
     // 2. Glow outline when held
-    if (this.held) {
+    if (this.held && !unrolled) {
       ctx.save();
       ctx.shadowColor = 'rgba(251, 188, 5, 0.6)';
       ctx.shadowBlur = 12;
@@ -117,8 +117,8 @@ export class DiceComponent {
     ctx.roundRect(-hs, -hs, this.size, this.size, 16);
     ctx.fill();
 
-    // 4. Border stroke if not held
-    if (!this.held) {
+    // 4. Border stroke if not held or if unrolled
+    if (!this.held || unrolled) {
       ctx.strokeStyle = diceBorder;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
@@ -126,9 +126,44 @@ export class DiceComponent {
       ctx.stroke();
     }
 
-    // 5. Draw Pips
-    this._drawPips(ctx, this.visualValue, this.size, dicePips);
+    // 5. Draw Pips or Star
+    if (unrolled) {
+      this._drawStar(ctx, this.size);
+    } else {
+      this._drawPips(ctx, this.visualValue, this.size, dicePips);
+    }
 
+    ctx.restore();
+  }
+
+  _drawStar(ctx, size) {
+    ctx.save();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    
+    const spikes = 4;
+    const outerRadius = size * 0.22;
+    const innerRadius = size * 0.08;
+    const cx = 0;
+    const cy = 0;
+    
+    let rot = (Math.PI / 2) * 3;
+    const step = Math.PI / spikes;
+
+    ctx.moveTo(cx, cy - outerRadius);
+    for (let i = 0; i < spikes; i++) {
+      let x = cx + Math.cos(rot) * outerRadius;
+      let y = cy + Math.sin(rot) * outerRadius;
+      ctx.lineTo(x, y);
+      rot += step;
+
+      x = cx + Math.cos(rot) * innerRadius;
+      y = cy + Math.sin(rot) * innerRadius;
+      ctx.lineTo(x, y);
+      rot += step;
+    }
+    ctx.closePath();
+    ctx.fill();
     ctx.restore();
   }
 

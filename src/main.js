@@ -31,7 +31,7 @@ let lastTime = performance.now();
 const diceSize = 75;
 
 // Multiplayer setup state
-let selectedPlayerCount = 1;
+let selectedPlayerCount = 2;
 let isDiceRolling = false;
 
 // Category labels
@@ -113,33 +113,25 @@ function updateThemeToggleIcons(theme) {
 
 // Initialization
 function init() {
-  // Load and apply saved theme
-  const savedTheme = localStorage.getItem('theme') || 'dark';
-  if (savedTheme === 'light') {
-    document.body.classList.add('light-theme');
-    updateThemeToggleIcons('light');
-  } else {
-    document.body.classList.remove('light-theme');
-    updateThemeToggleIcons('dark');
+  selectedPlayerCount = 2;
+
+  // Bind exit tab button
+  const tabExit = document.getElementById('tab-exit');
+  if (tabExit) {
+    tabExit.addEventListener('click', () => {
+      if (confirm("Are you sure you want to exit the current match? Your progress will be saved.")) {
+        saveGameState();
+        document.getElementById('game-screen').style.display = 'none';
+        document.getElementById('setup-screen').style.display = 'flex';
+      }
+    });
   }
 
-  // Bind theme toggle buttons
-  const themeToggleSetup = document.getElementById('btn-theme-toggle-setup');
-  const themeToggleGame = document.getElementById('btn-theme-toggle-game');
-
-  const toggleTheme = () => {
-    const isLight = document.body.classList.toggle('light-theme');
-    const newTheme = isLight ? 'light' : 'dark';
-    localStorage.setItem('theme', newTheme);
-    updateThemeToggleIcons(newTheme);
-  };
-
-  if (themeToggleSetup) themeToggleSetup.addEventListener('click', toggleTheme);
-  if (themeToggleGame) themeToggleGame.addEventListener('click', toggleTheme);
-
-  // Bind setup count selector
-  setupCountSelector();
-  updateNameInputs();
+  // Set up social SDK
+  social.initialize().then(() => {
+    updateSocialHeader();
+    refreshLeaderboard();
+  });
 
   // Set up social SDK
   social.initialize().then(() => {
@@ -303,32 +295,7 @@ function loadGameState() {
   }
 }
 
-// Player Setup controller
-function setupCountSelector() {
-  const countButtons = document.querySelectorAll('.btn-count');
-  countButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      countButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedPlayerCount = parseInt(btn.dataset.count, 10);
-      updateNameInputs();
-    });
-  });
-}
-
-function updateNameInputs() {
-  const container = document.getElementById('player-names-container');
-  container.innerHTML = '';
-  for (let i = 1; i <= selectedPlayerCount; i++) {
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'input-field';
-    input.id = `input-p${i}`;
-    input.value = `Player ${i}`;
-    input.placeholder = `Player ${i} Name`;
-    container.appendChild(input);
-  }
-}
+// Name inputs updated in HTML, no-op helper
 
 // Responsive layout adjusting
 function resizeCanvas() {
@@ -399,8 +366,14 @@ function onResize() {
 // Input routing
 function onCanvasPointerDown(e) {
   const rect = canvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
+  let mx = e.clientX - rect.left;
+  let my = e.clientY - rect.top;
+  
+  // Invert touch coordinates for Player 2 (board is rotated 180 degrees)
+  if (engine.activePlayerIndex === 1) {
+    mx = rect.width - mx;
+    my = rect.height - my;
+  }
   handleTap(mx, my);
 }
 
@@ -573,11 +546,10 @@ function showGameOver() {
 
 // UI Updating
 function updateUI() {
-  // Update turn strip player name
-  const activePlayerName = engine.playerNames[engine.activePlayerIndex];
+  const activeIdx = engine.activePlayerIndex;
+  const activePlayerName = engine.playerNames[activeIdx];
   document.getElementById('active-player-name').innerText = `TURN: ${activePlayerName.toUpperCase()}`;
 
-  // Update turn metadata
   rollsRemainingText.innerText = `ROLLS REMAINING: ${engine.rollsRemaining}/3`;
 
   if (engine.rollsRemaining === 3) {
@@ -588,160 +560,163 @@ function updateUI() {
     statusDescText.innerText = "Tap to hold, roll again!";
   }
 
-  // Roll button state
+  // Roll button state & dynamic color
   btnRoll.disabled = (engine.rollsRemaining === 0 || engine.isGameOver || isDiceRolling);
+  const activeColor = activeIdx === 0 ? 'var(--color-accent-indigo)' : 'var(--color-accent-secondary)';
+  btnRoll.style.background = activeColor;
+  btnRoll.style.borderColor = 'var(--color-accent-gold)';
+
+  // Rotate game board card for Player 2
+  const boardCard = document.getElementById('game-board-card');
+  if (boardCard) {
+    if (activeIdx === 1) {
+      boardCard.classList.add('rotated');
+    } else {
+      boardCard.classList.remove('rotated');
+    }
+  }
+
+  // Update dynamic round/scores tab
+  const tabRound = document.getElementById('tab-round');
+  if (tabRound) {
+    const p1Score = engine.getTotalScore(0);
+    const p2Score = engine.getTotalScore(1);
+    const activeColorDot = activeIdx === 0 ? 'var(--color-accent-indigo)' : 'var(--color-accent-secondary)';
+    tabRound.innerHTML = `${p2Score}<span class="score-dot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background-color:${activeColorDot}; margin: 0 4px; vertical-align: middle;"></span>${p1Score}`;
+  }
 
   // Render dynamic scorecard table
   renderScorecard();
 }
 
 function renderScorecard() {
-  const pCount = engine.playerCount;
   const activeIdx = engine.activePlayerIndex;
   const hasRolled = engine.rollsRemaining < 3;
 
-  // Render Upper Section Table
-  let upperHtml = `<table class="scorecard-table">`;
-  upperHtml += `<thead><tr><th>UPPER SECTION</th>`;
-  for (let i = 0; i < pCount; i++) {
-    const isActive = i === activeIdx;
-    let name = engine.playerNames[i];
-    if (name.length > 8) name = name.substring(0, 6) + '..';
-    const activeClass = isActive ? ' class="active-column-header"' : '';
-    upperHtml += `<th${activeClass}>${name.toUpperCase()}</th>`;
-  }
-  upperHtml += `</tr></thead><tbody>`;
+  let html = `<table class="scorecard-table"><tbody>`;
 
+  // 1. Upper Section Categories
   upperCategories.forEach(cat => {
-    upperHtml += renderCategoryRow(cat, pCount, activeIdx, hasRolled);
+    html += renderCategoryRow(cat, activeIdx, hasRolled);
   });
 
-  upperHtml += `<tr class="summary-row-tr"><td>Subtotal</td>`;
-  for (let i = 0; i < pCount; i++) {
-    const isActive = i === activeIdx;
-    const cellClass = isActive ? ' class="active-column-cell"' : '';
-    upperHtml += `<td${cellClass}>${engine.getUpperSectionSum(i)}</td>`;
-  }
-  upperHtml += `</tr>`;
+  // 2. Upper Section Summaries
+  html += `
+    <tr class="summary-row-tr">
+      <td class="category-cell summary-label">Subtotal</td>
+      <td class="player-cell p2-cell filled summary-val">${engine.getUpperSectionSum(1)}</td>
+      <td class="player-cell p1-cell filled summary-val">${engine.getUpperSectionSum(0)}</td>
+    </tr>
+    <tr class="summary-row-tr">
+      <td class="category-cell summary-label">Bonus (+35)</td>
+      <td class="player-cell p2-cell filled summary-val">+${engine.getUpperSectionBonus(1)}</td>
+      <td class="player-cell p1-cell filled summary-val">+${engine.getUpperSectionBonus(0)}</td>
+    </tr>
+  `;
 
-  upperHtml += `<tr class="summary-row-tr"><td>Bonus (+35)</td>`;
-  for (let i = 0; i < pCount; i++) {
-    const isActive = i === activeIdx;
-    const cellClass = isActive ? ' class="active-column-cell"' : '';
-    upperHtml += `<td${cellClass}>+${engine.getUpperSectionBonus(i)}</td>`;
-  }
-  upperHtml += `</tr>`;
-  upperHtml += `</tbody></table>`;
-
-  // Render Lower Section Table
-  let lowerHtml = `<table class="scorecard-table">`;
-  lowerHtml += `<thead><tr><th>LOWER SECTION</th>`;
-  for (let i = 0; i < pCount; i++) {
-    const isActive = i === activeIdx;
-    let name = engine.playerNames[i];
-    if (name.length > 8) name = name.substring(0, 6) + '..';
-    const activeClass = isActive ? ' class="active-column-header"' : '';
-    lowerHtml += `<th${activeClass}>${name.toUpperCase()}</th>`;
-  }
-  lowerHtml += `</tr></thead><tbody>`;
-
+  // 3. Lower Section Categories
   lowerCategories.forEach(cat => {
-    lowerHtml += renderCategoryRow(cat, pCount, activeIdx, hasRolled);
+    html += renderCategoryRow(cat, activeIdx, hasRolled);
   });
 
-  lowerHtml += `<tr class="summary-row-tr"><td>Subtotal</td>`;
-  for (let i = 0; i < pCount; i++) {
-    const isActive = i === activeIdx;
-    const cellClass = isActive ? ' class="active-column-cell"' : '';
-    lowerHtml += `<td${cellClass}>${engine.getLowerSectionSum(i)}</td>`;
-  }
-  lowerHtml += `</tr>`;
+  // 4. Grand Total Summary
+  html += `
+    <tr class="summary-row-tr grand-total">
+      <td class="category-cell summary-label">GRAND TOTAL</td>
+      <td class="player-cell p2-cell filled summary-val grand-val">${engine.getTotalScore(1)}</td>
+      <td class="player-cell p1-cell filled summary-val grand-val">${engine.getTotalScore(0)}</td>
+    </tr>
+  `;
 
-  lowerHtml += `<tr class="summary-row-tr grand-total"><td>GRAND TOTAL</td>`;
-  for (let i = 0; i < pCount; i++) {
-    const isActive = i === activeIdx;
-    const cellClass = isActive ? ' class="active-column-cell grand-val"' : ' class="grand-val"';
-    lowerHtml += `<td${cellClass}>${engine.getTotalScore(i)}</td>`;
-  }
-  lowerHtml += `</tr>`;
-  lowerHtml += `</tbody></table>`;
+  html += `</tbody></table>`;
 
-  const playerClass = pCount > 2 ? 'many-players' : 'few-players';
   tableContainer.innerHTML = `
-    <div class="scorecard-tables-flex ${playerClass}">
-      <div class="scorecard-table-wrapper upper-wrapper">
-        ${upperHtml}
-      </div>
-      <div class="scorecard-table-wrapper lower-wrapper">
-        ${lowerHtml}
-      </div>
+    <div class="scorecard-table-wrapper">
+      ${html}
     </div>
   `;
 }
 
-function renderCategoryRow(cat, pCount, activeIdx, hasRolled) {
-  const label = categoryLabels[cat];
-  const isFilled = engine.scorecards[activeIdx][cat] !== null;
+function renderCategoryRow(cat, activeIdx, hasRolled) {
+  const isP1Filled = engine.scorecards[0][cat] !== null;
+  const isP2Filled = engine.scorecards[1][cat] !== null;
+  
+  const isActiveP1 = activeIdx === 0;
+  const isActiveP2 = activeIdx === 1;
+  
+  const isFilled = activeIdx === 0 ? isP1Filled : isP2Filled;
   const isClickable = !isFilled && !engine.isGameOver && !isDiceRolling;
   const showPreview = hasRolled && !isDiceRolling;
 
-  const rowClass = `class="category-row ${isClickable ? 'clickable' : ''} ${isClickable && showPreview ? 'active-roll' : ''}"`;
+  // Category symbol/icon column
+  const symbolHtml = getCategorySymbol(cat);
 
-  const diceMap = {
-    [ScoringCategory.ONES]: { val: 1, char: '⚀' },
-    [ScoringCategory.TWOS]: { val: 2, char: '⚁' },
-    [ScoringCategory.THREES]: { val: 3, char: '⚂' },
-    [ScoringCategory.FOURS]: { val: 4, char: '⚃' },
-    [ScoringCategory.FIVES]: { val: 5, char: '⚄' },
-    [ScoringCategory.SIXES]: { val: 6, char: '⚅' }
-  };
-
-  const instruction = categoryInstructions[cat] || '';
-  const icon = categoryIcons[cat] || 'casino';
-
-  let labelHtml = `
-    <div class="category-label-container">
-      <span class="material-symbols-outlined category-row-icon">
-        ${icon}
-      </span>
-      <div class="category-text-block">
-        <div class="category-title-row">
-          <span class="category-name">${label}</span>
-  `;
-  
-  if (diceMap[cat]) {
-    const d = diceMap[cat];
-    labelHtml += `
-          <span class="inline-die-icon" title="Scoring target: ${d.val}">${d.char}</span>
-    `;
+  // Player 2 Cell (Index 1)
+  let p2CellHtml = '';
+  const p2Score = engine.scorecards[1][cat];
+  if (p2Score !== null) {
+    p2CellHtml = `<td class="player-cell p2-cell filled"><span class="cell-value">${p2Score}</span></td>`;
+  } else if (isActiveP2 && showPreview) {
+    const preview = engine.calculateScore(cat, engine.diceValues);
+    p2CellHtml = `<td class="player-cell p2-cell preview"><span class="cell-value">${preview}</span></td>`;
+  } else {
+    p2CellHtml = `<td class="player-cell p2-cell empty"><span class="cell-value">-</span></td>`;
   }
-  
-  labelHtml += `
-        </div>
-        <div class="category-instruction">${instruction}</div>
-      </div>
-    </div>
-  `;
 
-  let rowHtml = `<tr ${rowClass} data-category="${cat}">`;
-  rowHtml += `<td>${labelHtml}</td>`;
-
-  for (let i = 0; i < pCount; i++) {
-    const actualScore = engine.scorecards[i][cat];
-    const isActive = i === activeIdx;
-    const cellClass = isActive ? ' class="active-column-cell"' : '';
-
-    if (actualScore !== null) {
-      rowHtml += `<td${cellClass}><span class="cell-value">${actualScore}</span></td>`;
-    } else if (isActive && showPreview) {
-      const preview = engine.calculateScore(cat, engine.diceValues);
-      rowHtml += `<td${cellClass}><span class="cell-value preview">${preview}</span></td>`;
-    } else {
-      rowHtml += `<td${cellClass}><span class="cell-value empty">-</span></td>`;
-    }
+  // Player 1 Cell (Index 0)
+  let p1CellHtml = '';
+  const p1Score = engine.scorecards[0][cat];
+  if (p1Score !== null) {
+    p1CellHtml = `<td class="player-cell p1-cell filled"><span class="cell-value">${p1Score}</span></td>`;
+  } else if (isActiveP1 && showPreview) {
+    const preview = engine.calculateScore(cat, engine.diceValues);
+    p1CellHtml = `<td class="player-cell p1-cell preview"><span class="cell-value">${preview}</span></td>`;
+  } else {
+    p1CellHtml = `<td class="player-cell p1-cell empty"><span class="cell-value">-</span></td>`;
   }
-  rowHtml += `</tr>`;
-  return rowHtml;
+
+  const rowClass = `category-row ${isClickable ? 'clickable' : ''} ${isClickable && showPreview ? 'active-roll' : ''}`;
+  
+  return `
+    <tr class="${rowClass}" data-category="${cat}">
+      <td class="category-cell">${symbolHtml}</td>
+      ${p2CellHtml}
+      ${p1CellHtml}
+    </tr>
+  `;
+}
+
+function getCategorySymbol(cat) {
+  switch (cat) {
+    case ScoringCategory.ONES:
+      return `<svg viewBox="0 0 24 24" class="svg-cat-icon"><rect x="3" y="3" width="18" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>`;
+    case ScoringCategory.TWOS:
+      return `<svg viewBox="0 0 24 24" class="svg-cat-icon"><rect x="3" y="3" width="18" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="8" r="2" fill="currentColor"/><circle cx="16" cy="16" r="2" fill="currentColor"/></svg>`;
+    case ScoringCategory.THREES:
+      return `<svg viewBox="0 0 24 24" class="svg-cat-icon"><rect x="3" y="3" width="18" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="7" cy="7" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="17" cy="17" r="2" fill="currentColor"/></svg>`;
+    case ScoringCategory.FOURS:
+      return `<svg viewBox="0 0 24 24" class="svg-cat-icon"><rect x="3" y="3" width="18" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="8" r="2" fill="currentColor"/><circle cx="16" cy="8" r="2" fill="currentColor"/><circle cx="8" cy="16" r="2" fill="currentColor"/><circle cx="16" cy="16" r="2" fill="currentColor"/></svg>`;
+    case ScoringCategory.FIVES:
+      return `<svg viewBox="0 0 24 24" class="svg-cat-icon"><rect x="3" y="3" width="18" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="7" cy="7" r="2" fill="currentColor"/><circle cx="17" cy="7" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="7" cy="17" r="2" fill="currentColor"/><circle cx="17" cy="17" r="2" fill="currentColor"/></svg>`;
+    case ScoringCategory.SIXES:
+      return `<svg viewBox="0 0 24 24" class="svg-cat-icon"><rect x="3" y="3" width="18" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="7" r="2" fill="currentColor"/><circle cx="16" cy="7" r="2" fill="currentColor"/><circle cx="8" cy="12" r="2" fill="currentColor"/><circle cx="16" cy="12" r="2" fill="currentColor"/><circle cx="8" cy="17" r="2" fill="currentColor"/><circle cx="16" cy="17" r="2" fill="currentColor"/></svg>`;
+    case ScoringCategory.THREE_OF_A_KIND:
+      return `<svg viewBox="0 0 54 18" class="svg-cat-icon-wide"><rect x="2" y="3" width="12" height="12" rx="1" fill="currentColor"/><rect x="20" y="3" width="12" height="12" rx="1" fill="currentColor"/><rect x="38" y="3" width="12" height="12" rx="1" fill="currentColor"/></svg>`;
+    case ScoringCategory.FOUR_OF_A_KIND:
+      return `<svg viewBox="0 0 72 18" class="svg-cat-icon-wide"><circle cx="8" cy="9" r="5" fill="currentColor"/><circle cx="26" cy="9" r="5" fill="currentColor"/><circle cx="44" cy="9" r="5" fill="currentColor"/><circle cx="62" cy="9" r="5" fill="currentColor"/></svg>`;
+    case ScoringCategory.FULL_HOUSE:
+      return `<svg viewBox="0 0 90 18" class="svg-cat-icon-wide"><path d="M 10 3 L 16 9 L 10 15 L 4 9 Z" fill="currentColor"/><path d="M 28 3 L 34 9 L 28 15 L 22 9 Z" fill="currentColor"/><path d="M 46 3 L 52 9 L 46 15 L 40 9 Z" fill="currentColor"/><circle cx="68" cy="9" r="5" fill="currentColor"/><circle cx="86" cy="9" r="5" fill="currentColor"/></svg>`;
+    case ScoringCategory.SMALL_STRAIGHT:
+      return `<svg viewBox="0 0 72 18" class="svg-cat-icon-wide"><rect x="3" y="4" width="10" height="10" rx="1" fill="currentColor"/><path d="M 26 3 L 32 9 L 26 15 L 20 9 Z" fill="currentColor"/><circle cx="44" cy="9" r="5" fill="currentColor"/><path d="M 62 3 L 68 14 L 56 14 Z" fill="currentColor"/></svg>`;
+    case ScoringCategory.LARGE_STRAIGHT:
+      return `<svg viewBox="0 0 90 18" class="svg-cat-icon-wide"><rect x="3" y="4" width="10" height="10" rx="1" fill="currentColor"/><path d="M 26 3 L 32 9 L 26 15 L 20 9 Z" fill="currentColor"/><circle cx="44" cy="9" r="5" fill="currentColor"/><path d="M 62 3 L 68 14 L 56 14 Z" fill="currentColor"/><path d="M 80 2 L 82 7 L 87 7 L 83 10 L 85 15 L 80 12 L 75 15 L 77 10 L 73 7 L 78 7 Z" fill="currentColor"/></svg>`;
+    case ScoringCategory.YATZY:
+      return `<svg viewBox="0 0 90 18" class="svg-cat-icon-wide"><path d="M 10 2 L 12 7 L 17 7 L 13 10 L 15 15 L 10 12 L 5 15 L 7 10 L 3 7 L 8 7 Z" fill="currentColor"/><path d="M 28 2 L 30 7 L 35 7 L 31 10 L 33 15 L 28 12 L 23 15 L 25 10 L 21 7 L 26 7 Z" fill="currentColor"/><path d="M 46 2 L 48 7 L 53 7 L 49 10 L 51 15 L 46 12 L 41 15 L 43 10 L 39 7 L 44 7 Z" fill="currentColor"/><path d="M 68 2 L 70 7 L 75 7 L 71 10 L 73 15 L 68 12 L 63 15 L 65 10 L 61 7 L 66 7 Z" fill="currentColor"/><path d="M 86 2 L 88 7 L 93 7 L 89 10 L 91 15 L 86 12 L 81 15 L 83 10 L 79 7 L 84 7 Z" fill="currentColor"/></svg>`;
+    case ScoringCategory.CHANCE:
+      return `<svg viewBox="0 0 24 24" class="svg-cat-icon"><text x="12" y="18" font-family="'Outfit', sans-serif" font-size="16" font-weight="bold" fill="currentColor" text-anchor="middle">?</text></svg>`;
+    default:
+      return '';
+  }
 }
 
 // Social Platform Sync
@@ -815,9 +790,10 @@ function loop(time) {
     ctx.clearRect(0, 0, rect.width, rect.height);
 
     // Update and draw dice components
+    const unrolled = engine.rollsRemaining === 3;
     diceComponents.forEach(die => {
       die.update(dt);
-      die.draw(ctx);
+      die.draw(ctx, unrolled);
     });
   }
 

@@ -13,6 +13,7 @@ class DiceComponent extends PositionComponent with TapCallbacks {
   int visualValue = 1;
   int targetValue = 1;
   bool held = false;
+  bool unrolled = false;
   
   double rollTimer = 0.0;
   double rotationTorque = 0.0;
@@ -104,44 +105,92 @@ class DiceComponent extends PositionComponent with TapCallbacks {
     canvas.drawRRect(rrect.shift(const Offset(4, 8)), shadowPaint);
 
     // 2. Gold Glow outline when held
-    if (held) {
+    if (held && !unrolled) {
       final glowPaint = Paint()
         ..color = const Color(0xFFFBBC05).withOpacity(0.5)
         ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 12);
       canvas.drawRRect(rrect, glowPaint);
     }
 
-    // 3. Die Body (Ivory / Soft Cream gradient for a premium board game look)
-    final bodyPaint = Paint()
-      ..shader = ui.Gradient.linear(
-        Offset(-size.x / 2, -size.y / 2),
-        Offset(size.x / 2, size.y / 2),
-        const [
-          Color(0xFFFCF9F2), // Premium Ivory start
-          Color(0xFFEADFC9), // Soft cream/bone end
-        ],
-      );
-    canvas.drawRRect(rrect, bodyPaint);
+    if (unrolled) {
+      // 3. Unrolled Die Body (Dark Slate Grey)
+      final bodyPaint = Paint()..color = const Color(0xFF202430);
+      canvas.drawRRect(rrect, bodyPaint);
 
-    // 4. Border stroke
-    final borderPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = held ? 3.0 : 1.5
-      ..color = held ? const Color(0xFFFBBC05) : const Color(0xFF1B3D2F).withOpacity(0.45);
-    canvas.drawRRect(rrect, borderPaint);
+      // 4. Border stroke
+      final borderPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5
+        ..color = Colors.white.withOpacity(0.1);
+      canvas.drawRRect(rrect, borderPaint);
 
-    // 5. Draw Pips (Deep forest green pips matching felt background)
-    final pipPaint = Paint()
-      ..color = const Color(0xFF0B1C15)
-      ..style = PaintingStyle.fill;
-      
-    final pipDepthPaint = Paint()
-      ..color = const Color(0x1A000000)
-      ..style = PaintingStyle.fill;
+      // 5. Draw Center 4-Pointed Star
+      _drawStar(canvas, size.x);
+    } else {
+      // 3. Die Body (Ivory / Soft Cream gradient for a premium board game look)
+      final bodyPaint = Paint()
+        ..shader = ui.Gradient.linear(
+          Offset(-size.x / 2, -size.y / 2),
+          Offset(size.x / 2, size.y / 2),
+          const [
+            Color(0xFFFCF9F2), // Premium Ivory start
+            Color(0xFFEADFC9), // Soft cream/bone end
+          ],
+        );
+      canvas.drawRRect(rrect, bodyPaint);
 
-    _drawPips(canvas, visualValue, size.x, pipPaint, pipDepthPaint);
+      // 4. Border stroke
+      final borderPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = held ? 3.0 : 1.5
+        ..color = held ? const Color(0xFFFBBC05) : const Color(0xFF1F2430).withOpacity(0.45);
+      canvas.drawRRect(rrect, borderPaint);
+
+      // 5. Draw Pips (Slate dark grey/blue)
+      final pipPaint = Paint()
+        ..color = const Color(0xFF2C3E50)
+        ..style = PaintingStyle.fill;
+        
+      final pipDepthPaint = Paint()
+        ..color = const Color(0x1A000000)
+        ..style = PaintingStyle.fill;
+
+      _drawPips(canvas, visualValue, size.x, pipPaint, pipDepthPaint);
+    }
 
     canvas.restore();
+  }
+
+  void _drawStar(ui.Canvas canvas, double size) {
+    final double outerRadius = size * 0.22;
+    final double innerRadius = size * 0.08;
+    const double cx = 0;
+    const double cy = 0;
+    const int spikes = 4;
+    
+    final Path path = Path();
+    double rot = (pi / 2) * 3;
+    const double step = pi / spikes;
+
+    path.moveTo(cx, cy - outerRadius);
+    for (int i = 0; i < spikes; i++) {
+      double x = cx + cos(rot) * outerRadius;
+      double y = cy + sin(rot) * outerRadius;
+      path.lineTo(x, y);
+      rot += step;
+
+      x = cx + cos(rot) * innerRadius;
+      y = cy + sin(rot) * innerRadius;
+      path.lineTo(x, y);
+      rot += step;
+    }
+    path.close();
+
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+    
+    canvas.drawPath(path, paint);
   }
 
   @override

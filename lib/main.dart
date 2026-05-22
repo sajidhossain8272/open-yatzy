@@ -21,13 +21,13 @@ class OpenYatzyApp extends StatelessWidget {
       title: 'YATZY!',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0B1C15), // Board felt green
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFFFBBC05), // Amber Gold
-          secondary: Color(0xFFFBBC05),
-          surface: Color(0xFF162E24), // Rich forest green card
-          background: Color(0xFF0B1C15),
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: const Color(0xFF7BB4D9), // Pastel Blue
+        colorScheme: const ColorScheme.light(
+          primary: Color(0xFF2196F3), // Player 1 Blue
+          secondary: Color(0xFFEF5350), // Player 2 Red
+          surface: Color(0xFF323846), // Dark slate card
+          background: Color(0xFF7BB4D9),
         ),
         fontFamily: 'Roboto',
       ),
@@ -53,7 +53,7 @@ class _GameScreenState extends State<GameScreen> {
 
   // Multiplayer setup state
   bool _isGameStarted = false;
-  int _setupPlayerCount = 1;
+  int _setupPlayerCount = 2;
   final List<TextEditingController> _nameControllers = [];
   bool _isRolling = false;
   bool _hasSavedGame = false;
@@ -61,10 +61,9 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize 4 text controllers for names
-    for (int i = 1; i <= 4; i++) {
-      _nameControllers.add(TextEditingController(text: 'Player $i'));
-    }
+    // Initialize 2 text controllers for names
+    _nameControllers.add(TextEditingController(text: 'Player 1'));
+    _nameControllers.add(TextEditingController(text: 'Player 2'));
 
     _game = YatzyGame(
       engine: _engine,
@@ -243,10 +242,10 @@ class _GameScreenState extends State<GameScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF162E24),
+          backgroundColor: const Color(0xFF323846),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: Color(0xFF1B3D2F), width: 1.5),
+            side: const BorderSide(color: Color(0xFF1F2430), width: 1.5),
           ),
           title: Row(
             children: [
@@ -274,14 +273,14 @@ class _GameScreenState extends State<GameScreen> {
                 children: [
                   const Text(
                     'YATZY! is a classic dice board game played with 5 dice. Your objective is to score the highest total by rolling combinations and filling out your scorecard.',
-                    style: TextStyle(fontSize: 13, height: 1.5),
+                    style: TextStyle(fontSize: 13, height: 1.5, color: Colors.white),
                   ),
                   const SizedBox(height: 14),
                   const Text(
                     'Gameplay',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFFFBBC05)),
                   ),
-                  const Divider(color: Color(0xFF1B3D2F)),
+                  const Divider(color: Color(0xFF1F2430)),
                   _buildBulletPoint('A match consists of 13 rounds per player.'),
                   _buildBulletPoint('On your turn, you can roll the dice up to 3 times.'),
                   _buildBulletPoint('After the 1st or 2nd roll, tap any dice you want to hold (they won\'t be re-rolled).'),
@@ -291,7 +290,7 @@ class _GameScreenState extends State<GameScreen> {
                     'Scoring Categories',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFFFBBC05)),
                   ),
-                  const Divider(color: Color(0xFF1B3D2F)),
+                  const Divider(color: Color(0xFF1F2430)),
                   const Text(
                     'Upper Section (Ones to Sixes)',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
@@ -343,7 +342,7 @@ class _GameScreenState extends State<GameScreen> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFBBC05),
-                    foregroundColor: const Color(0xFF0B1C15),
+                    foregroundColor: const Color(0xFF323846),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
@@ -451,10 +450,10 @@ class _GameScreenState extends State<GameScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF162E24),
+          backgroundColor: const Color(0xFF323846),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Color(0xFF1B3D2F), width: 1.5),
+            side: const BorderSide(color: Color(0xFF1F2430), width: 1.5),
           ),
           title: const Text(
             'Reset Match?',
@@ -472,7 +471,7 @@ class _GameScreenState extends State<GameScreen> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFBBC05),
-                foregroundColor: const Color(0xFF0B1C15),
+                foregroundColor: const Color(0xFF323846),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
               onPressed: () {
@@ -497,6 +496,7 @@ class _GameScreenState extends State<GameScreen> {
     final List<Map<String, dynamic>> playerRankings = [];
     for (int i = 0; i < _engine.playerCount; i++) {
       playerRankings.add({
+        'index': i,
         'name': _engine.playerNames[i],
         'score': _engine.getTotalScore(i),
       });
@@ -508,36 +508,40 @@ class _GameScreenState extends State<GameScreen> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          backgroundColor: const Color(0xFF323846),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: Color(0xFF1F2430), width: 1.5),
+          ),
           title: const Text(
             '🏆 Match Completed!',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFFACC15)),
+            style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFFBBC05)),
             textAlign: TextAlign.center,
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Final rankings:', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text('Final rankings:', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
               const SizedBox(height: 12),
               ...playerRankings.asMap().entries.map((entry) {
                 final index = entry.key;
                 final player = entry.value;
                 final score = player['score'];
                 final name = player['name'];
+                final pIndex = player['index'] as int;
+                final playerColor = pIndex == 0 ? const Color(0xFF2196F3) : const Color(0xFFEF5350);
 
                 String rankEmoji = '${index + 1}.';
                 if (index == 0) rankEmoji = '🥇';
                 if (index == 1) rankEmoji = '🥈';
-                if (index == 2) rankEmoji = '🥉';
 
                 return Container(
                   margin: const EdgeInsets.symmetric(vertical: 4),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: index == 0 ? const Color(0xFF6366F1).withOpacity(0.2) : const Color(0xFF0F172A),
+                    color: index == 0 ? playerColor.withOpacity(0.2) : const Color(0xFF202430),
                     borderRadius: BorderRadius.circular(8),
-                    border: index == 0 ? Border.all(color: const Color(0xFFFACC15), width: 1) : null,
+                    border: index == 0 ? Border.all(color: playerColor, width: 1.5) : null,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -550,14 +554,14 @@ class _GameScreenState extends State<GameScreen> {
                             name,
                             style: TextStyle(
                               fontWeight: index == 0 ? FontWeight.bold : FontWeight.normal,
-                              color: index == 0 ? const Color(0xFFFACC15) : Colors.white,
+                              color: index == 0 ? playerColor : Colors.white,
                             ),
                           ),
                         ],
                       ),
                       Text(
                         '$score pts',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(fontWeight: FontWeight.bold, color: index == 0 ? playerColor : Colors.white),
                       ),
                     ],
                   ),
@@ -569,11 +573,12 @@ class _GameScreenState extends State<GameScreen> {
             Center(
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6366F1),
+                  backgroundColor: const Color(0xFFFBBC05),
+                  foregroundColor: const Color(0xFF323846),
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Back to Menu', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: const Text('Back to Menu', style: TextStyle(fontWeight: FontWeight.bold)),
                 onPressed: () {
                   Navigator.of(context).pop();
                   setState(() {
@@ -594,15 +599,343 @@ class _GameScreenState extends State<GameScreen> {
       return _buildSetupScreen();
     }
 
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final bool isCompact = screenWidth < 600;
-
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0B1C15),
-        elevation: 0,
-        centerTitle: false,
-        leading: IconButton(
+      endDrawer: _buildLeaderboardDrawer(),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AnimatedRotation(
+                    turns: _engine.activePlayerIndex == 1 ? 0.5 : 0.0,
+                    duration: const Duration(milliseconds: 600),
+                    curve: Curves.easeInOutCubic,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        // Main Card
+                        Container(
+                          constraints: const BoxConstraints(maxWidth: 480),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF323846),
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: const Color(0xFF1F2430), width: 1.5),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.35),
+                                blurRadius: 30,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // Header
+                              _buildCustomHeader(),
+                              const SizedBox(height: 10),
+                              // Turn strip
+                              _buildTurnStrip(),
+                              const SizedBox(height: 10),
+                              // Scorecard (On TOP)
+                              _buildScorecardTable(),
+                              const SizedBox(height: 14),
+                              // Dice component (Flame canvas on BOTTOM)
+                              _buildDiceArena(),
+                              const SizedBox(height: 14),
+                              // Controls
+                              _buildControlBar(),
+                            ],
+                          ),
+                        ),
+                        // Left score tab
+                        Positioned(
+                          left: -28,
+                          top: 180,
+                          child: _buildLeftScoreTab(),
+                        ),
+                        // Right exit tab
+                        Positioned(
+                          right: -28,
+                          top: 180,
+                          child: _buildRightExitTab(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSetupScreen() {
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 400),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF323846),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: const Color(0xFF1F2430), width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(24.0),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Center(
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFFFBBC05).withOpacity(0.3),
+                                  blurRadius: 20,
+                                  spreadRadius: 2,
+                                )
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(24),
+                              child: Image.asset(
+                                'assets/images/logo.png',
+                                height: 110,
+                                width: 110,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const Text(
+                          'YATZY!',
+                          style: TextStyle(
+                            fontSize: 36,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 4,
+                            color: Color(0xFFFBBC05),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'Play Local Multiplayer Without Ads',
+                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'open-games.app is the parent name who builds open-source games without ads. Play Now Free!',
+                          style: TextStyle(color: Color(0xFFA0A5B5), fontSize: 11),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 20),
+                        
+                        if (_hasSavedGame) ...[
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 20),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF202430),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: const Color(0xFFFBBC05), width: 1.5),
+                            ),
+                            child: Column(
+                              children: [
+                                const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.history_edu, color: Color(0xFFFBBC05), size: 18),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Unfinished Match Detected',
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFFFBBC05)),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    TextButton.icon(
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            backgroundColor: const Color(0xFF323846),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(16),
+                                              side: const BorderSide(color: Color(0xFF1F2430), width: 1.5),
+                                            ),
+                                            title: const Text('Delete Saved Match?', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFFBBC05))),
+                                            content: const Text('Are you sure you want to delete the saved match progress?', style: TextStyle(color: Colors.white90)),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(context),
+                                                child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+                                              ),
+                                              ElevatedButton(
+                                                style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                  _deleteSavedMatch();
+                                                },
+                                                child: const Text('Delete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                      icon: const Icon(Icons.delete, color: Colors.redAccent, size: 16),
+                                      label: const Text('Delete', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 12)),
+                                    ),
+                                    ElevatedButton.icon(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFFFBBC05),
+                                        foregroundColor: const Color(0xFF323846),
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                      ),
+                                      icon: const Icon(Icons.play_arrow, size: 18),
+                                      label: const Text('RESUME MATCH', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                      onPressed: () async {
+                                        final loaded = await _loadGameState();
+                                        if (loaded) {
+                                          _game.resetVisuals();
+                                          _game.syncVisualsToEngine();
+                                          setState(() {
+                                            _isGameStarted = true;
+                                            _isRolling = false;
+                                          });
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+
+                        // Player Names Card
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF202430),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: const Color(0xFF1F2430)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'PLAYER NAMES',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFFFBBC05)),
+                              ),
+                              const SizedBox(height: 12),
+                              ...List.generate(2, (index) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: TextField(
+                                    controller: _nameControllers[index],
+                                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                                    decoration: InputDecoration(
+                                      labelText: 'Player ${index + 1} Name',
+                                      labelStyle: const TextStyle(color: Color(0xFFA0A5B5), fontSize: 12),
+                                      filled: true,
+                                      fillColor: const Color(0xFF323846),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: const BorderSide(color: Color(0xFF1F2430)),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: const BorderSide(color: Color(0xFFFBBC05)),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Start Match Button
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFBBC05),
+                            foregroundColor: const Color(0xFF323846),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            elevation: 4,
+                          ),
+                          onPressed: () {
+                            final List<String> names = [];
+                            for (int i = 0; i < 2; i++) {
+                              final val = _nameControllers[i].text.trim();
+                              names.add(val.isNotEmpty ? val : 'Player ${i + 1}');
+                            }
+                            
+                            _engine.setupPlayers(2, names);
+                            _game.resetVisuals();
+                            setState(() {
+                              _isGameStarted = true;
+                              _isRolling = false;
+                            });
+                          },
+                          child: const Text(
+                            'START MATCH',
+                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Positioned(
+                      top: -12,
+                      right: -12,
+                      child: IconButton(
+                        icon: const Icon(Icons.help_outline, color: Color(0xFFFBBC05), size: 24),
+                        onPressed: _showRulesDialog,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCustomHeader() {
+    return Row(
+      children: [
+        IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.grey),
           onPressed: () {
             setState(() {
@@ -610,463 +943,173 @@ class _GameScreenState extends State<GameScreen> {
             });
           },
         ),
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: Image.asset(
-                'assets/images/logo.png',
-                height: 28,
-                width: 28,
-                fit: BoxFit.cover,
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Image.asset(
+            'assets/images/logo.png',
+            height: 28,
+            width: 28,
+            fit: BoxFit.cover,
+          ),
+        ),
+        const SizedBox(width: 8),
+        const Text(
+          'YATZY!',
+          style: TextStyle(
+            letterSpacing: 2,
+            fontWeight: FontWeight.w900,
+            color: Color(0xFFFBBC05),
+            fontSize: 18,
+          ),
+        ),
+        const Spacer(),
+        IconButton(
+          icon: const Icon(Icons.help_outline, color: Color(0xFFFBBC05)),
+          onPressed: _showRulesDialog,
+        ),
+        IconButton(
+          icon: const Icon(Icons.refresh, color: Colors.grey),
+          onPressed: _resetGame,
+        ),
+        if (_social.currentUser == null)
+          IconButton(
+            icon: const Icon(Icons.login, color: Color(0xFFFBBC05)),
+            onPressed: _loginSocial,
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: Center(
+              child: Text(
+                _social.currentUser!.displayName.split(' ')[0],
+                style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
               ),
             ),
-            const SizedBox(width: 8),
-            const Text(
-              'YATZY!',
-              style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.w900, color: Color(0xFFFBBC05)),
+          ),
+        IconButton(
+          icon: const Icon(Icons.leaderboard, color: Color(0xFFFBBC05)),
+          onPressed: () {
+            _refreshLeaderboard();
+            Scaffold.of(context).openEndDrawer();
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTurnStrip() {
+    final activeIdx = _engine.activePlayerIndex;
+    final activePlayerName = _engine.playerNames[activeIdx];
+    final activeColor = activeIdx == 0 ? const Color(0xFF2196F3) : const Color(0xFFEF5350);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: activeColor.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: activeColor.withOpacity(0.3), width: 1),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.person, color: activeColor, size: 18),
+          const SizedBox(width: 8),
+          Text(
+            "TURN: ${activePlayerName.toUpperCase()}",
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.5,
+              color: activeColor,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLeftScoreTab() {
+    final p1Score = _engine.getTotalScore(0);
+    final p2Score = _engine.getTotalScore(1);
+    final activeColor = _engine.activePlayerIndex == 0 ? const Color(0xFF2196F3) : const Color(0xFFEF5350);
+
+    return Container(
+      width: 28,
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          bottomLeft: Radius.circular(20),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            offset: Offset(-2, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '$p2Score',
+            style: const TextStyle(color: Color(0xFF2C3E50), fontSize: 11, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4),
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: activeColor,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$p1Score',
+            style: const TextStyle(color: Color(0xFF2C3E50), fontSize: 11, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRightExitTab() {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _isGameStarted = false;
+        });
+      },
+      child: Container(
+        width: 28,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 4,
+              offset: Offset(2, 2),
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.help_outline, color: Color(0xFFFBBC05)),
-            onPressed: _showRulesDialog,
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.grey),
-            onPressed: _resetGame,
-          ),
-          if (_social.currentUser == null)
-            TextButton.icon(
-              icon: const Icon(Icons.login, color: Color(0xFFFACC15), size: 18),
-              label: const Text('Login', style: TextStyle(color: Color(0xFFFACC15), fontSize: 13)),
-              onPressed: _loginSocial,
-            )
-          else
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Center(
-                child: Text(
-                  _social.currentUser!.displayName,
-                  style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ),
-          Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.leaderboard, color: Color(0xFFFACC15)),
-              onPressed: () {
-                _refreshLeaderboard();
-                Scaffold.of(context).openEndDrawer();
-              },
-            ),
-          ),
-        ],
-      ),
-      endDrawer: _buildLeaderboardDrawer(),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Active Player Handoff Indicator
-              Container(
-                color: const Color(0xFF162E24),
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.person, color: Color(0xFFFBBC05), size: 18),
-                    const SizedBox(width: 8),
-                    Text(
-                      "TURN: ${_engine.playerNames[_engine.activePlayerIndex].toUpperCase()}",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.5,
-                        color: Color(0xFFFBBC05),
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // 1. Flame Dice Arena Canvas Container
-              Container(
-                margin: const EdgeInsets.all(16),
-                height: 180,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF162E24),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF1B3D2F), width: 1.5),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x33000000),
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
-                    )
-                  ],
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: GameWidget(game: _game),
-              ),
-
-              // 2. Play Turn Status & Persistent Action Roll Button
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'ROLLS REMAINING: ${_engine.rollsRemaining}/3',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFFFACC15)),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          _engine.rollsRemaining == 3 
-                              ? 'Roll dice to begin!' 
-                              : _engine.rollsRemaining == 0 
-                                  ? 'Select score category' 
-                                  : 'Tap to hold, roll again!',
-                          style: const TextStyle(color: Colors.grey, fontSize: 12),
-                        ),
-                      ],
-                    ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFBBC05),
-                        foregroundColor: const Color(0xFF0B1C15),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          side: const BorderSide(color: Color(0xFFFDD835), width: 1.5),
-                        ),
-                        elevation: 4,
-                      ),
-                      onPressed: (_engine.rollsRemaining > 0 && !_engine.isGameOver && !_isRolling) ? _rollDice : null,
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.casino, size: 20),
-                          SizedBox(width: 8),
-                          Text('ROLL DICE', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // 3. Interactive Scorecard Layout
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: _buildScorecardTable(),
-              ),
-
-              const SizedBox(height: 30),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Builds a setup widget to configure player count and names before matching.
-  Widget _buildSetupScreen() {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0B1C15),
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.help_outline, color: Color(0xFFFBBC05)),
-            onPressed: _showRulesDialog,
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 20),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFFBBC05).withOpacity(0.3),
-                            blurRadius: 20,
-                            spreadRadius: 2,
-                          )
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(24),
-                        child: Image.asset(
-                          'assets/images/logo.png',
-                          height: 120,
-                          width: 120,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Text(
-                    'YATZY!',
-                    style: TextStyle(
-                      fontSize: 42,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 4,
-                      color: Color(0xFFFBBC05),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Play Local Multiplayer Without Ads',
-                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'open-games.app is the parent name who builds open-source games without ads. Play Now Free!',
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  if (_hasSavedGame) ...[
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 24),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF162E24),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFFBBC05), width: 1.5),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x33000000),
-                            blurRadius: 10,
-                            offset: Offset(0, 4),
-                          )
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.history_edu, color: Color(0xFFFBBC05)),
-                              SizedBox(width: 8),
-                              Text(
-                                'Unfinished Match Detected',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFFFBBC05)),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              TextButton.icon(
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      backgroundColor: const Color(0xFF162E24),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        side: const BorderSide(color: Color(0xFF1B3D2F), width: 1.5),
-                                      ),
-                                      title: const Text('Delete Saved Match?', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFFBBC05))),
-                                      content: const Text('Are you sure you want to delete the saved match progress?'),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context),
-                                          child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
-                                        ),
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                            _deleteSavedMatch();
-                                          },
-                                          child: const Text('Delete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                                icon: const Icon(Icons.delete, color: Colors.redAccent, size: 18),
-                                label: const Text('Delete', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
-                              ),
-                              ElevatedButton.icon(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFFBBC05),
-                                  foregroundColor: const Color(0xFF0B1C15),
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                  elevation: 2,
-                                ),
-                                icon: const Icon(Icons.play_arrow),
-                                label: const Text('RESUME MATCH', style: TextStyle(fontWeight: FontWeight.bold)),
-                                onPressed: () async {
-                                  final loaded = await _loadGameState();
-                                  if (loaded) {
-                                    _game.resetVisuals();
-                                    _game.syncVisualsToEngine();
-                                    setState(() {
-                                      _isGameStarted = true;
-                                      _isRolling = false;
-                                    });
-                                  }
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                  
-                  // Player Count card
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF162E24),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFF1B3D2F)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Number of Players',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFFFBBC05)),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [1, 2, 3, 4].map((count) {
-                            final bool selected = _setupPlayerCount == count;
-                            return InkWell(
-                              onTap: () {
-                                setState(() {
-                                  _setupPlayerCount = count;
-                                });
-                              },
-                              borderRadius: BorderRadius.circular(12),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                decoration: BoxDecoration(
-                                  color: selected ? const Color(0xFFFBBC05) : const Color(0xFF0B1C15),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: selected ? const Color(0xFFFDD835) : const Color(0xFF1B3D2F),
-                                    width: 1.5,
-                                  ),
-                                ),
-                                child: Text(
-                                  '$count',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                    color: selected ? const Color(0xFF0B1C15) : Colors.grey,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Player Names card
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF162E24),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFF1B3D2F)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Player Names',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFFFBBC05)),
-                        ),
-                        const SizedBox(height: 12),
-                        ...List.generate(_setupPlayerCount, (index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: TextField(
-                              controller: _nameControllers[index],
-                              decoration: InputDecoration(
-                                labelText: 'Player ${index + 1} Name',
-                                filled: true,
-                                fillColor: const Color(0xFF0B1C15),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: const BorderSide(color: Color(0xFF1B3D2F)),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: const BorderSide(color: Color(0xFFFBBC05)),
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-
-                  // Start Match Button
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFBBC05),
-                      foregroundColor: const Color(0xFF0B1C15),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      elevation: 4,
-                    ),
-                    child: const Text(
-                      'START MATCH',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.5),
-                    ),
-                    onPressed: () {
-                      final List<String> names = [];
-                      for (int i = 0; i < _setupPlayerCount; i++) {
-                        final val = _nameControllers[i].text.trim();
-                        names.add(val.isNotEmpty ? val : 'Player ${i + 1}');
-                      }
-                      
-                      _engine.setupPlayers(_setupPlayerCount, names);
-                      _game.resetVisuals();
-                      setState(() {
-                        _isGameStarted = true;
-                        _isRolling = false;
-                      });
-                    },
-                  ),
-                ],
+        child: const Center(
+          child: RotatedBox(
+            quarterTurns: 1,
+            child: Text(
+              'EXIT',
+              style: TextStyle(
+                color: Color(0xFF2C3E50),
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
               ),
             ),
           ),
@@ -1075,44 +1118,76 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  /// Builds the scorecard table using columns (Category | Player 1 | Player 2 ... )
-  Widget _buildScorecardTable() {
-    final int pCount = _engine.playerCount;
-    final int activeIdx = _engine.activePlayerIndex;
-    final bool hasRolled = _engine.rollsRemaining < 3;
-    final bool isCompact = MediaQuery.of(context).size.width < 500;
+  Widget _buildDiceArena() {
+    return Container(
+      height: 125,
+      decoration: BoxDecoration(
+        color: const Color(0xFF202430),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF1F2430), width: 1.5),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x33000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          )
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: GameWidget(game: _game),
+    );
+  }
 
-    final categories = ScoringCategory.values;
-    final upperSection = categories.sublist(0, 6);
-    final lowerSection = categories.sublist(6);
+  Widget _buildControlBar() {
+    final activeIdx = _engine.activePlayerIndex;
+    final activeColor = activeIdx == 0 ? const Color(0xFF2196F3) : const Color(0xFFEF5350);
+    final canRoll = _engine.rollsRemaining > 0 && !_engine.isGameOver && !_isRolling;
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Upper Section Column
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildTableHeader('UPPER SECTION', pCount, activeIdx, isCompact),
-              const SizedBox(height: 6),
-              ...upperSection.map((cat) => _buildRowForCategory(cat, pCount, activeIdx, hasRolled)),
-              _buildRowForSummary('Subtotal', (idx) => '${_engine.getUpperSectionSum(idx)}', pCount, activeIdx),
-              _buildRowForSummary('Bonus (+35)', (idx) => '+${_engine.getUpperSectionBonus(idx)}', pCount, activeIdx),
-            ],
-          ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'ROLLS REMAINING: ${_engine.rollsRemaining}/3',
+              style: TextStyle(
+                fontWeight: FontWeight.bold, 
+                fontSize: 12, 
+                color: activeColor,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              _engine.rollsRemaining == 3 
+                  ? 'Roll dice to begin!' 
+                  : _engine.rollsRemaining == 0 
+                      ? 'Select score category' 
+                      : 'Tap to hold, roll again!',
+              style: const TextStyle(color: Color(0xFFA0A5B5), fontSize: 11),
+            ),
+          ],
         ),
-        SizedBox(width: isCompact ? 6.0 : 12.0),
-        // Lower Section Column
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: activeColor,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 4,
+          ),
+          onPressed: canRoll ? _rollDice : null,
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              _buildTableHeader('LOWER SECTION', pCount, activeIdx, isCompact),
-              const SizedBox(height: 6),
-              ...lowerSection.map((cat) => _buildRowForCategory(cat, pCount, activeIdx, hasRolled)),
-              _buildRowForSummary('Subtotal', (idx) => '${_engine.getLowerSectionSum(idx)}', pCount, activeIdx),
-              _buildRowForSummary('GRAND TOTAL', (idx) => '${_engine.getTotalScore(idx)}', pCount, activeIdx, isGrand: true),
+              Icon(Icons.casino, size: 18),
+              SizedBox(width: 8),
+              Text(
+                'ROLL DICE',
+                style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 13),
+              ),
             ],
           ),
         ),
@@ -1120,344 +1195,327 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  Widget _buildTableHeader(String title, int pCount, int activeIdx, bool isCompact) {
-    final List<Widget> headerCells = [
-      Expanded(
-        flex: 3,
-        child: Text(
-          title,
-          style: TextStyle(
-            fontWeight: FontWeight.bold, 
-            color: Colors.grey, 
-            fontSize: isCompact ? 9 : 11
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    ];
+  Widget _buildScorecardTable() {
+    final int activeIdx = _engine.activePlayerIndex;
+    final bool hasRolled = _engine.rollsRemaining < 3;
 
-    for (int i = 0; i < pCount; i++) {
-      final bool isActive = i == activeIdx;
-      String name = _engine.playerNames[i];
-      if (name.length > 8) name = '${name.substring(0, 6)}..';
-
-      headerCells.add(
-        Expanded(
-          flex: 2,
-          child: Container(
-            alignment: Alignment.center,
-            padding: EdgeInsets.symmetric(vertical: isCompact ? 2 : 4, horizontal: 1),
-            decoration: BoxDecoration(
-              color: isActive ? const Color(0xFFFBBC05).withOpacity(0.15) : Colors.transparent,
-              borderRadius: BorderRadius.circular(4),
-              border: isActive ? Border.all(color: const Color(0xFFFBBC05), width: 1.0) : null,
-            ),
-            child: Text(
-              name,
-              style: TextStyle(
-                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                color: isActive ? const Color(0xFFFBBC05) : Colors.grey,
-                fontSize: isCompact ? 9 : 11,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ),
-      );
-    }
+    final categories = ScoringCategory.values;
+    final upperSection = categories.sublist(0, 6);
+    final lowerSection = categories.sublist(6);
 
     return Container(
-      padding: EdgeInsets.symmetric(vertical: isCompact ? 6 : 8, horizontal: isCompact ? 6 : 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF162E24),
-        borderRadius: BorderRadius.circular(8),
+        color: const Color(0xFFFAF4E7),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF1F2430), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: Row(children: headerCells),
-    );
-  }
-
-  IconData _getCategoryIcon(ScoringCategory category) {
-    switch (category) {
-      case ScoringCategory.ones: return Icons.looks_one;
-      case ScoringCategory.twos: return Icons.looks_two;
-      case ScoringCategory.threes: return Icons.looks_3;
-      case ScoringCategory.fours: return Icons.looks_4;
-      case ScoringCategory.fives: return Icons.looks_5;
-      case ScoringCategory.sixes: return Icons.looks_6;
-      case ScoringCategory.threeOfAKind: return Icons.filter_3;
-      case ScoringCategory.fourOfAKind: return Icons.filter_4;
-      case ScoringCategory.fullHouse: return Icons.home;
-      case ScoringCategory.smallStraight: return Icons.linear_scale;
-      case ScoringCategory.largeStraight: return Icons.forward;
-      case ScoringCategory.yatzy: return Icons.emoji_events;
-      case ScoringCategory.chance: return Icons.help_outline;
-    }
-  }
-
-  String _getCategoryInstruction(ScoringCategory category) {
-    switch (category) {
-      case ScoringCategory.ones: return 'Score sum of 1s';
-      case ScoringCategory.twos: return 'Score sum of 2s';
-      case ScoringCategory.threes: return 'Score sum of 3s';
-      case ScoringCategory.fours: return 'Score sum of 4s';
-      case ScoringCategory.fives: return 'Score sum of 5s';
-      case ScoringCategory.sixes: return 'Score sum of 6s';
-      case ScoringCategory.threeOfAKind: return 'Sum if 3+ matching';
-      case ScoringCategory.fourOfAKind: return 'Sum if 4+ matching';
-      case ScoringCategory.fullHouse: return '3 of kind + pair (25)';
-      case ScoringCategory.smallStraight: return 'Sequence of 4 (30)';
-      case ScoringCategory.largeStraight: return 'Sequence of 5 (40)';
-      case ScoringCategory.yatzy: return '5 matching (50)';
-      case ScoringCategory.chance: return 'Sum of all 5 dice';
-    }
-  }
-
-  String? _getCategoryDiceFace(ScoringCategory category) {
-    switch (category) {
-      case ScoringCategory.ones: return '⚀';
-      case ScoringCategory.twos: return '⚁';
-      case ScoringCategory.threes: return '⚂';
-      case ScoringCategory.fours: return '⚃';
-      case ScoringCategory.fives: return '⚄';
-      case ScoringCategory.sixes: return '⚅';
-      default: return null;
-    }
-  }
-
-  Widget _buildRowForCategory(ScoringCategory category, int pCount, int activeIdx, bool hasRolled) {
-    final String label = _getCategoryLabel(category);
-    final IconData icon = _getCategoryIcon(category);
-    final String instruction = _getCategoryInstruction(category);
-    final String? diceFace = _getCategoryDiceFace(category);
-    final bool isCompact = MediaQuery.of(context).size.width < 500;
-
-    final List<Widget> cells = [
-      Expanded(
-        flex: 3,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (!isCompact || pCount <= 2) ...[
-              Icon(
-                icon,
-                size: isCompact ? 14 : 18,
-                color: const Color(0xFF818CF8),
-              ),
-              SizedBox(width: isCompact ? 4 : 6),
-            ],
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          label,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: (isCompact && pCount > 2) ? 10 : 12,
-                            color: Colors.white,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (diceFace != null && (!isCompact || pCount <= 2)) ...[
-                        const SizedBox(width: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 0.5),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1E293B),
-                            border: Border.all(color: const Color(0xFF475569), width: 1),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            diceFace,
-                            style: const TextStyle(
-                              color: Color(0xFFFBBC05),
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  if (!isCompact) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      instruction,
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 9,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
+      clipBehavior: Clip.antiAlias,
+      child: Table(
+        columnWidths: const {
+          0: FlexColumnWidth(4.0),
+          1: FlexColumnWidth(3.0),
+          2: FlexColumnWidth(3.0),
+        },
+        defaultVerticalAlignment: TableCellVerticalAlignment.fill,
+        border: const TableBorder(
+          horizontalInside: BorderSide(color: Color(0xFF1F2430), width: 1.5),
+          verticalInside: BorderSide(color: Color(0xFF1F2430), width: 1.5),
         ),
-      ),
-    ];
-
-    final bool isClickable = _engine.scorecards[activeIdx][category] == null && !_engine.isGameOver && !_isRolling;
-    final bool showPreview = hasRolled && !_isRolling;
-
-    for (int i = 0; i < pCount; i++) {
-      final int? actualScore = _engine.scorecards[i][category];
-      final bool isActive = i == activeIdx;
-
-      Widget cellChild;
-      if (actualScore != null) {
-        cellChild = Text(
-          '$actualScore',
-          style: TextStyle(
-            fontWeight: FontWeight.bold, 
-            fontSize: isCompact ? 12 : 14
+        children: [
+          _buildHeaderRow(activeIdx),
+          ...upperSection.map((cat) => _buildCategoryRow(cat, activeIdx, hasRolled)),
+          _buildSummaryRow(
+            label: 'Subtotal',
+            scoreProvider: (idx) => _engine.getUpperSectionSum(idx),
           ),
-          textAlign: TextAlign.center,
-        );
-      } else if (isActive && showPreview) {
-        // Preview score
-        final preview = YatzyEngine.calculateScore(category, _engine.diceValues);
-        cellChild = Text(
-          '$preview',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFFFBBC05).withOpacity(0.8),
-            fontStyle: FontStyle.italic,
-            fontSize: isCompact ? 11 : 13,
+          _buildSummaryRow(
+            label: 'Bonus (+35)',
+            scoreProvider: (idx) => _engine.getUpperSectionBonus(idx),
           ),
-          textAlign: TextAlign.center,
-        );
-      } else {
-        cellChild = Text(
-          '-',
-          style: TextStyle(
-            color: const Color(0xFF475569),
-            fontSize: isCompact ? 12 : 14
+          ...lowerSection.map((cat) => _buildCategoryRow(cat, activeIdx, hasRolled)),
+          _buildSummaryRow(
+            label: 'GRAND TOTAL',
+            scoreProvider: (idx) => _engine.getTotalScore(idx),
+            isGrand: true,
           ),
-          textAlign: TextAlign.center,
-        );
-      }
-
-      cells.add(
-        Expanded(
-          flex: 2,
-          child: Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            decoration: BoxDecoration(
-              color: isActive ? const Color(0xFFFBBC05).withOpacity(0.05) : Colors.transparent,
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: cellChild,
-          ),
-        ),
-      );
-    }
-
-    return InkWell(
-      onTap: isClickable ? () => _selectCategory(category) : null,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 2),
-        padding: EdgeInsets.symmetric(horizontal: isCompact ? 6 : 12, vertical: isCompact ? 5 : 8),
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isClickable && showPreview ? const Color(0xFF1B3D2F) : Colors.transparent,
-            width: 1,
-          ),
-        ),
-        child: Row(children: cells),
+        ],
       ),
     );
   }
 
-  Widget _buildRowForSummary(String label, String Function(int) scoreProvider, int pCount, int activeIdx, {bool isGrand = false}) {
-    final bool isCompact = MediaQuery.of(context).size.width < 500;
+  TableRow _buildHeaderRow(int activeIdx) {
+    final p1Name = _engine.playerNames[0];
+    final p2Name = _engine.playerNames[1];
 
-    final List<Widget> cells = [
-      Expanded(
-        flex: 3,
-        child: Text(
-          label,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: isGrand ? const Color(0xFFFBBC05) : Colors.white,
-            fontSize: isGrand ? (isCompact ? 12 : 14) : (isCompact ? 10 : 12),
+    final isP1Active = activeIdx == 0;
+    final isP2Active = activeIdx == 1;
+
+    return TableRow(
+      children: [
+        _buildTableCell(
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 6.0),
+            child: Text(
+              'CATEGORY',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 10,
+                color: Color(0xFF1F2430),
+                letterSpacing: 0.5,
+              ),
+            ),
           ),
+          backgroundColor: const Color(0xFFFAF4E7),
         ),
-      ),
-    ];
-
-    for (int i = 0; i < pCount; i++) {
-      final String val = scoreProvider(i);
-      final bool isActive = i == activeIdx;
-
-      cells.add(
-        Expanded(
-          flex: 2,
+        _buildTableCell(
           child: Text(
-            val,
+            p2Name.toUpperCase(),
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: isGrand ? const Color(0xFFFBBC05) : Colors.white,
-              fontSize: isGrand ? (isCompact ? 14 : 17) : (isCompact ? 11 : 13),
+              fontSize: 11,
+              color: isP2Active ? const Color(0xFFEF5350) : const Color(0xFF1F2430),
+              decoration: isP2Active ? TextDecoration.underline : null,
+              decorationColor: const Color(0xFFEF5350),
+              decorationThickness: 2,
             ),
-            textAlign: TextAlign.center,
           ),
+          backgroundColor: const Color(0xFFFAF4E7),
         ),
+        _buildTableCell(
+          child: Text(
+            p1Name.toUpperCase(),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
+              color: isP1Active ? const Color(0xFF2196F3) : const Color(0xFF1F2430),
+              decoration: isP1Active ? TextDecoration.underline : null,
+              decorationColor: const Color(0xFF2196F3),
+              decorationThickness: 2,
+            ),
+          ),
+          backgroundColor: const Color(0xFFFAF4E7),
+        ),
+      ],
+    );
+  }
+
+  TableRow _buildCategoryRow(ScoringCategory category, int activeIdx, bool hasRolled) {
+    final isP1Filled = _engine.scorecards[0][category] != null;
+    final isP2Filled = _engine.scorecards[1][category] != null;
+    
+    final isActiveP1 = activeIdx == 0;
+    final isActiveP2 = activeIdx == 1;
+
+    final isP1CellClickable = !isP1Filled && isActiveP1 && !_engine.isGameOver && !_isRolling;
+    final isP2CellClickable = !isP2Filled && isActiveP2 && !_engine.isGameOver && !_isRolling;
+    
+    final showPreview = hasRolled && !_isRolling;
+
+    final categoryChild = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: CategorySymbolWidget(
+        category: category,
+        color: const Color(0xFF1F2430),
+      ),
+    );
+
+    Widget p2Cell;
+    Color p2BgColor;
+    final p2Score = _engine.scorecards[1][category];
+    if (p2Score != null) {
+      p2BgColor = const Color(0xFFFAF4E7);
+      p2Cell = Text(
+        '$p2Score',
+        style: const TextStyle(
+          fontWeight: FontWeight.w900,
+          color: Color(0xFF1F2430),
+          fontSize: 13,
+        ),
+      );
+    } else if (isActiveP2 && showPreview) {
+      p2BgColor = const Color(0xFFFAF4E7);
+      final preview = YatzyEngine.calculateScore(category, _engine.diceValues);
+      p2Cell = Text(
+        '$preview',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: const Color(0xFFEF5350).withOpacity(0.7),
+          fontStyle: FontStyle.italic,
+          fontSize: 12,
+        ),
+      );
+    } else {
+      p2BgColor = const Color(0xFFEF5350);
+      p2Cell = const SizedBox.shrink();
+    }
+
+    Widget p1Cell;
+    Color p1BgColor;
+    final p1Score = _engine.scorecards[0][category];
+    if (p1Score != null) {
+      p1BgColor = const Color(0xFFFAF4E7);
+      p1Cell = Text(
+        '$p1Score',
+        style: const TextStyle(
+          fontWeight: FontWeight.w900,
+          color: Color(0xFF1F2430),
+          fontSize: 13,
+        ),
+      );
+    } else if (isActiveP1 && showPreview) {
+      p1BgColor = const Color(0xFFFAF4E7);
+      final preview = YatzyEngine.calculateScore(category, _engine.diceValues);
+      p1Cell = Text(
+        '$preview',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: const Color(0xFF2196F3).withOpacity(0.7),
+          fontStyle: FontStyle.italic,
+          fontSize: 12,
+        ),
+      );
+    } else {
+      p1BgColor = const Color(0xFF2196F3);
+      p1Cell = const SizedBox.shrink();
+    }
+
+    final bool isRowClickable = (isActiveP1 && isP1CellClickable) || (isActiveP2 && isP2CellClickable);
+    final VoidCallback? onTap = isRowClickable ? () => _selectCategory(category) : null;
+
+    return TableRow(
+      children: [
+        _buildTableCell(
+          child: categoryChild,
+          backgroundColor: const Color(0xFFFAF4E7),
+          isClickable: isRowClickable,
+          onTap: onTap,
+        ),
+        _buildTableCell(
+          child: p2Cell,
+          backgroundColor: p2BgColor,
+          isClickable: isP2CellClickable,
+          onTap: onTap,
+        ),
+        _buildTableCell(
+          child: p1Cell,
+          backgroundColor: p1BgColor,
+          isClickable: isP1CellClickable,
+          onTap: onTap,
+        ),
+      ],
+    );
+  }
+
+  TableRow _buildSummaryRow({
+    required String label,
+    required int Function(int) scoreProvider,
+    bool isGrand = false,
+  }) {
+    final p2Score = scoreProvider(1);
+    final p1Score = scoreProvider(0);
+
+    return TableRow(
+      children: [
+        _buildTableCell(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: isGrand ? 12 : 11,
+                  color: isGrand ? const Color(0xFFFBBC05) : const Color(0xFF1F2430),
+                ),
+              ),
+            ),
+          ),
+          backgroundColor: isGrand ? const Color(0xFF202430) : const Color(0xFFEADFC9),
+        ),
+        _buildTableCell(
+          child: Text(
+            isGrand ? '$p2Score' : (label.contains('Bonus') ? '+$p2Score' : '$p2Score'),
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontSize: isGrand ? 14 : 12,
+              color: isGrand ? const Color(0xFFFBBC05) : const Color(0xFF1F2430),
+            ),
+          ),
+          backgroundColor: isGrand ? const Color(0xFF202430) : const Color(0xFFEADFC9),
+        ),
+        _buildTableCell(
+          child: Text(
+            isGrand ? '$p1Score' : (label.contains('Bonus') ? '+$p1Score' : '$p1Score'),
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontSize: isGrand ? 14 : 12,
+              color: isGrand ? const Color(0xFFFBBC05) : const Color(0xFF1F2430),
+            ),
+          ),
+          backgroundColor: isGrand ? const Color(0xFF202430) : const Color(0xFFEADFC9),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTableCell({
+    required Widget child,
+    Color? backgroundColor,
+    bool isClickable = false,
+    VoidCallback? onTap,
+  }) {
+    Widget content = Container(
+      height: 34,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: backgroundColor ?? const Color(0xFFFAF4E7),
+      ),
+      child: child,
+    );
+
+    if (isClickable && onTap != null) {
+      content = GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: content,
       );
     }
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: EdgeInsets.symmetric(horizontal: isCompact ? 6 : 12, vertical: isCompact ? 6 : 10),
-      decoration: BoxDecoration(
-        color: isGrand ? const Color(0xFFFBBC05).withOpacity(0.15) : const Color(0xFF162E24).withOpacity(0.6),
-        borderRadius: BorderRadius.circular(8),
-        border: isGrand ? Border.all(color: const Color(0xFFFBBC05), width: 1.2) : null,
-      ),
-      child: Row(children: cells),
-    );
+    return content;
   }
 
   Widget _buildLeaderboardDrawer() {
     return Drawer(
-      backgroundColor: const Color(0xFF0B1C15),
+      backgroundColor: const Color(0xFF202430),
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
               padding: const EdgeInsets.all(16),
-              color: const Color(0xFF162E24),
+              color: const Color(0xFF323846),
               child: const Row(
                 children: [
-                  Icon(Icons.emoji_events, color: Color(0xFFFACC15), size: 28),
+                  Icon(Icons.emoji_events, color: Color(0xFFFBBC05), size: 28),
                   SizedBox(width: 12),
                   Text(
                     'LEADERBOARD',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 1.5),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 1.5, color: Color(0xFFFBBC05)),
                   ),
                 ],
               ),
             ),
             Expanded(
               child: _leaderboard.isEmpty
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(child: CircularProgressIndicator(color: Color(0xFFFBBC05)))
                   : ListView.builder(
                       itemCount: _leaderboard.length,
                       itemBuilder: (context, index) {
@@ -1475,19 +1533,19 @@ class _GameScreenState extends State<GameScreen> {
                           margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF162E24),
+                            color: const Color(0xFF323846),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: rank <= 3 ? const Color(0xFFFACC15).withOpacity(0.3) : Colors.transparent,
+                              color: rank <= 3 ? const Color(0xFFFBBC05).withOpacity(0.3) : Colors.transparent,
                             ),
                           ),
                           child: Row(
                             children: [
-                              SizedBox(
+                              ui.SizedBox(
                                 width: 35,
                                 child: Text(
                                   rankSymbol,
-                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
@@ -1495,12 +1553,12 @@ class _GameScreenState extends State<GameScreen> {
                               Expanded(
                                 child: Text(
                                   name,
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                                 ),
                               ),
                               Text(
                                 '$score pts',
-                                style: const TextStyle(color: Color(0xFFFACC15), fontWeight: FontWeight.bold),
+                                style: const TextStyle(color: Color(0xFFFBBC05), fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -1530,5 +1588,307 @@ class _GameScreenState extends State<GameScreen> {
       case ScoringCategory.yatzy: return 'Yatzy!';
       case ScoringCategory.chance: return 'Chance';
     }
+  }
+}
+
+class CategorySymbolPainter extends CustomPainter {
+  final ScoringCategory category;
+  final Color color;
+
+  CategorySymbolPainter(this.category, this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final strokePaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
+    final double h = size.height;
+    final double w = size.width;
+
+    switch (category) {
+      case ScoringCategory.ones:
+        _drawDieOutline(canvas, strokePaint, h);
+        _drawPips(canvas, paint, h, [const Offset(0.5, 0.5)]);
+        break;
+      case ScoringCategory.twos:
+        _drawDieOutline(canvas, strokePaint, h);
+        _drawPips(canvas, paint, h, [const Offset(0.3, 0.3), const Offset(0.7, 0.7)]);
+        break;
+      case ScoringCategory.threes:
+        _drawDieOutline(canvas, strokePaint, h);
+        _drawPips(canvas, paint, h, [const Offset(0.25, 0.25), const Offset(0.5, 0.5), const Offset(0.75, 0.75)]);
+        break;
+      case ScoringCategory.fours:
+        _drawDieOutline(canvas, strokePaint, h);
+        _drawPips(canvas, paint, h, [
+          const Offset(0.3, 0.3),
+          const Offset(0.7, 0.3),
+          const Offset(0.3, 0.7),
+          const Offset(0.7, 0.7),
+        ]);
+        break;
+      case ScoringCategory.fives:
+        _drawDieOutline(canvas, strokePaint, h);
+        _drawPips(canvas, paint, h, [
+          const Offset(0.25, 0.25),
+          const Offset(0.75, 0.25),
+          const Offset(0.5, 0.5),
+          const Offset(0.25, 0.75),
+          const Offset(0.75, 0.75),
+        ]);
+        break;
+      case ScoringCategory.sixes:
+        _drawDieOutline(canvas, strokePaint, h);
+        _drawPips(canvas, paint, h, [
+          const Offset(0.3, 0.25),
+          const Offset(0.7, 0.25),
+          const Offset(0.3, 0.5),
+          const Offset(0.7, 0.5),
+          const Offset(0.3, 0.75),
+          const Offset(0.7, 0.75),
+        ]);
+        break;
+      case ScoringCategory.threeOfAKind:
+        final double boxSize = h * 0.7;
+        final double spacing = h * 0.3;
+        final double startX = (w - (3 * boxSize + 2 * spacing)) / 2;
+        final double centerY = (h - boxSize) / 2;
+        for (int i = 0; i < 3; i++) {
+          final rect = RRect.fromRectAndRadius(
+            Rect.fromLTWH(startX + i * (boxSize + spacing), centerY, boxSize, boxSize),
+            const Radius.circular(1.5),
+          );
+          canvas.drawRRect(rect, paint);
+        }
+        break;
+      case ScoringCategory.fourOfAKind:
+        final double circleRadius = h * 0.32;
+        final double spacing = h * 0.3;
+        final double startX = (w - (8 * circleRadius + 3 * spacing)) / 2 + circleRadius;
+        final double centerY = h / 2;
+        for (int i = 0; i < 4; i++) {
+          canvas.drawCircle(Offset(startX + i * (2 * circleRadius + spacing), centerY), circleRadius, paint);
+        }
+        break;
+      case ScoringCategory.fullHouse:
+        final double itemSize = h * 0.65;
+        final double spacing = h * 0.25;
+        final double startX = (w - (5 * itemSize + 4 * spacing)) / 2;
+        final double centerY = h / 2;
+        for (int i = 0; i < 3; i++) {
+          final double cx = startX + i * (itemSize + spacing) + itemSize / 2;
+          final double cy = centerY;
+          final path = Path()
+            ..moveTo(cx, cy - itemSize / 2)
+            ..lineTo(cx + itemSize / 2, cy)
+            ..lineTo(cx, cy + itemSize / 2)
+            ..lineTo(cx - itemSize / 2, cy)
+            ..close();
+          canvas.drawPath(path, paint);
+        }
+        for (int i = 3; i < 5; i++) {
+          final double cx = startX + i * (itemSize + spacing) + itemSize / 2;
+          final double cy = centerY;
+          canvas.drawCircle(Offset(cx, cy), itemSize * 0.45, paint);
+        }
+        break;
+      case ScoringCategory.smallStraight:
+        final double itemSize = h * 0.65;
+        final double spacing = h * 0.25;
+        final double startX = (w - (4 * itemSize + 3 * spacing)) / 2;
+        final double centerY = h / 2;
+        
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromLTWH(startX, centerY - itemSize / 2, itemSize, itemSize),
+            const Radius.circular(1.5),
+          ),
+          paint,
+        );
+
+        double cx = startX + (itemSize + spacing) + itemSize / 2;
+        final pDiamond = Path()
+          ..moveTo(cx, centerY - itemSize / 2)
+          ..lineTo(cx + itemSize / 2, centerY)
+          ..lineTo(cx, centerY + itemSize / 2)
+          ..lineTo(cx - itemSize / 2, centerY)
+          ..close();
+        canvas.drawPath(pDiamond, paint);
+
+        cx = startX + 2 * (itemSize + spacing) + itemSize / 2;
+        canvas.drawCircle(Offset(cx, centerY), itemSize * 0.45, paint);
+
+        cx = startX + 3 * (itemSize + spacing) + itemSize / 2;
+        final pTriangle = Path()
+          ..moveTo(cx, centerY - itemSize / 2)
+          ..lineTo(cx + itemSize / 2, centerY + itemSize / 2)
+          ..lineTo(cx - itemSize / 2, centerY + itemSize / 2)
+          ..close();
+        canvas.drawPath(pTriangle, paint);
+        break;
+      case ScoringCategory.largeStraight:
+        final double itemSize = h * 0.65;
+        final double spacing = h * 0.22;
+        final double startX = (w - (5 * itemSize + 4 * spacing)) / 2;
+        final double centerY = h / 2;
+
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromLTWH(startX, centerY - itemSize / 2, itemSize, itemSize),
+            const Radius.circular(1.5),
+          ),
+          paint,
+        );
+
+        double cx = startX + (itemSize + spacing) + itemSize / 2;
+        final pDiamond = Path()
+          ..moveTo(cx, centerY - itemSize / 2)
+          ..lineTo(cx + itemSize / 2, centerY)
+          ..lineTo(cx, centerY + itemSize / 2)
+          ..lineTo(cx - itemSize / 2, centerY)
+          ..close();
+        canvas.drawPath(pDiamond, paint);
+
+        cx = startX + 2 * (itemSize + spacing) + itemSize / 2;
+        canvas.drawCircle(Offset(cx, centerY), itemSize * 0.45, paint);
+
+        cx = startX + 3 * (itemSize + spacing) + itemSize / 2;
+        final pTriangle = Path()
+          ..moveTo(cx, centerY - itemSize / 2)
+          ..lineTo(cx + itemSize / 2, centerY + itemSize / 2)
+          ..lineTo(cx - itemSize / 2, centerY + itemSize / 2)
+          ..close();
+        canvas.drawPath(pTriangle, paint);
+
+        cx = startX + 4 * (itemSize + spacing) + itemSize / 2;
+        _paintStar(canvas, cx, centerY, itemSize / 2, paint);
+        break;
+      case ScoringCategory.yatzy:
+        final double itemSize = h * 0.65;
+        final double spacing = h * 0.22;
+        final double startX = (w - (5 * itemSize + 4 * spacing)) / 2;
+        final double centerY = h / 2;
+        for (int i = 0; i < 5; i++) {
+          final double cx = startX + i * (itemSize + spacing) + itemSize / 2;
+          _paintStar(canvas, cx, centerY, itemSize / 2, paint);
+        }
+        break;
+      case ScoringCategory.chance:
+        final textPainter = TextPainter(
+          text: TextSpan(
+            text: '?',
+            style: TextStyle(
+              color: color,
+              fontSize: h * 0.8,
+              fontWeight: FontWeight.w900,
+              fontFamily: 'Roboto',
+            ),
+          ),
+          textDirection: TextDirection.ltr,
+        );
+        textPainter.layout();
+        textPainter.paint(canvas, Offset((w - textPainter.width) / 2, (h - textPainter.height) / 2));
+        break;
+    }
+  }
+
+  void _drawDieOutline(Canvas canvas, Paint strokePaint, double h) {
+    final double boxSize = h * 0.72;
+    final double left = (h - boxSize) / 2;
+    final double top = (h - boxSize) / 2;
+    final rrect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(left, top, boxSize, boxSize),
+      const Radius.circular(3),
+    );
+    canvas.drawRRect(rrect, strokePaint);
+  }
+
+  void _drawPips(Canvas canvas, Paint fillPaint, double h, List<Offset> pips) {
+    final double boxSize = h * 0.72;
+    final double left = (h - boxSize) / 2;
+    final double top = (h - boxSize) / 2;
+    final double pipRadius = h * 0.08;
+
+    for (var pip in pips) {
+      final double px = left + pip.dx * boxSize;
+      final double py = top + pip.dy * boxSize;
+      canvas.drawCircle(Offset(px, py), pipRadius, fillPaint);
+    }
+  }
+
+  void _paintStar(Canvas canvas, double cx, double cy, double radius, Paint paint) {
+    final double outerRadius = radius;
+    final double innerRadius = radius * 0.4;
+    const int spikes = 5;
+    
+    final path = Path();
+    double rot = (pi / 2) * 3;
+    const double step = pi / spikes;
+
+    path.moveTo(cx, cy - outerRadius);
+    for (int i = 0; i < spikes; i++) {
+      double x = cx + cos(rot) * outerRadius;
+      double y = cy + sin(rot) * outerRadius;
+      path.lineTo(x, y);
+      rot += step;
+
+      x = cx + cos(rot) * innerRadius;
+      y = cy + sin(rot) * innerRadius;
+      path.lineTo(x, y);
+      rot += step;
+    }
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CategorySymbolPainter oldDelegate) {
+    return oldDelegate.category != category || oldDelegate.color != color;
+  }
+}
+
+class CategorySymbolWidget extends StatelessWidget {
+  final ScoringCategory category;
+  final Color color;
+
+  const CategorySymbolWidget({
+    super.key,
+    required this.category,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final double height = 20.0;
+    final double width;
+    switch (category) {
+      case ScoringCategory.threeOfAKind:
+        width = 60.0;
+        break;
+      case ScoringCategory.fourOfAKind:
+      case ScoringCategory.smallStraight:
+        width = 80.0;
+        break;
+      case ScoringCategory.fullHouse:
+      case ScoringCategory.largeStraight:
+      case ScoringCategory.yatzy:
+        width = 100.0;
+        break;
+      default:
+        width = 24.0;
+    }
+    return SizedBox(
+      width: width,
+      height: height,
+      child: CustomPaint(
+        painter: CategorySymbolPainter(category, color),
+      ),
+    );
   }
 }

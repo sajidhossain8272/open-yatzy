@@ -17,7 +17,7 @@ class YatzyGame extends FlameGame with HasTapCallbacks {
   });
 
   @override
-  Color backgroundColor() => const Color(0xFF0F172A); // Matching background (#0F172A)
+  Color backgroundColor() => const Color(0xFF323846); // Matching outer card container color
 
   @override
   Future<void> onLoad() async {
@@ -51,6 +51,7 @@ class YatzyGame extends FlameGame with HasTapCallbacks {
       
       die.visualValue = engine.diceValues[i];
       die.held = engine.heldDice[i];
+      die.unrolled = engine.rollsRemaining == 3;
       _diceComponents.add(die);
       add(die);
     }
@@ -64,6 +65,7 @@ class YatzyGame extends FlameGame with HasTapCallbacks {
     for (int i = 0; i < 5; i++) {
       // Sync hold state first
       _diceComponents[i].held = held[i];
+      _diceComponents[i].unrolled = false;
       
       if (!held[i] || engine.rollsRemaining == 2) {
         // Roll animation with target value
@@ -80,18 +82,21 @@ class YatzyGame extends FlameGame with HasTapCallbacks {
       _diceComponents[i].targetValue = 1;
       _diceComponents[i].angle = 0;
       _diceComponents[i].scaleFactor = 1.0;
+      _diceComponents[i].unrolled = true;
     }
   }
 
   /// Sync visual dice state to match current engine values and holds.
   void syncVisualsToEngine() {
     if (_diceComponents.length == 5) {
+      final bool unrolledState = engine.rollsRemaining == 3;
       for (int i = 0; i < 5; i++) {
         _diceComponents[i].held = engine.heldDice[i];
         _diceComponents[i].visualValue = engine.diceValues[i];
         _diceComponents[i].targetValue = engine.diceValues[i];
         _diceComponents[i].angle = 0;
         _diceComponents[i].scaleFactor = 1.0;
+        _diceComponents[i].unrolled = unrolledState;
       }
     }
   }
