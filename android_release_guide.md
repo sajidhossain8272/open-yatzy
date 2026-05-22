@@ -9,7 +9,7 @@ This guide details the step-by-step procedure to generate Android platform files
 Since the code is structured cross-platform and does not contain native folders by default, you must generate the Android directories first. Run the following command from the root of the project:
 
 ```bash
-flutter create --org org.opengaming --project-name open_yatzy .
+flutter create --org app.opengames --project-name open_yatzy .
 ```
 
 This will initialize the `android/` directory with standard configuration templates.
@@ -31,7 +31,7 @@ Open `android/app/build.gradle` and configure the compile SDK, target SDK, and u
 2. **Locate the `defaultConfig` block** and configure your unique package identifier and SDK range:
    ```groovy
    defaultConfig {
-       applicationId "org.opengaming.yatzy"
+       applicationId "app.opengames.yatzy"
        minSdkVersion 21        // Supports Android 5.0 (Lollipop) and above
        targetSdkVersion 34     // Android 14
        versionCode 1

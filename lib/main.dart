@@ -842,7 +842,7 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                   const SizedBox(height: 6),
                   const Text(
-                    'Open-Gaming is the parent name who builds open-source games without ads. Play Now Free!',
+                    'open-games.app is the parent name who builds open-source games without ads. Play Now Free!',
                     style: TextStyle(color: Colors.grey, fontSize: 12),
                     textAlign: TextAlign.center,
                   ),
