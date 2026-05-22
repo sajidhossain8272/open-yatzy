@@ -223,12 +223,13 @@ function setupDice() {
 
   const spacing = rect.width / 6;
   const centerY = rect.height / 2;
+  const dynamicDiceSize = Math.min(75, rect.width / 6.5);
 
   for (let i = 0; i < 5; i++) {
     const x = spacing * (i + 1);
     const y = centerY;
 
-    const die = new DiceComponent(i, x, y, diceSize, () => {
+    const die = new DiceComponent(i, x, y, dynamicDiceSize, () => {
       if (engine.rollsRemaining === 3 || engine.rollsRemaining < 0 || engine.isGameOver || isDiceRolling) return;
       const succeeded = engine.toggleHold(i);
       if (succeeded) {
@@ -252,10 +253,12 @@ function onResize() {
 
   const spacing = rect.width / 6;
   const centerY = rect.height / 2;
+  const dynamicDiceSize = Math.min(75, rect.width / 6.5);
 
   diceComponents.forEach((die, i) => {
     die.x = spacing * (i + 1);
     die.y = centerY;
+    die.size = dynamicDiceSize;
   });
 }
 
@@ -454,77 +457,83 @@ function renderScorecard() {
   const activeIdx = engine.activePlayerIndex;
   const hasRolled = engine.rollsRemaining < 3;
 
-  let html = `<table class="scorecard-table">`;
-
-  // Table Head
-  html += `<thead><tr><th>CATEGORY</th>`;
+  // Render Upper Section Table
+  let upperHtml = `<table class="scorecard-table">`;
+  upperHtml += `<thead><tr><th>UPPER SECTION</th>`;
   for (let i = 0; i < pCount; i++) {
     const isActive = i === activeIdx;
     let name = engine.playerNames[i];
     if (name.length > 8) name = name.substring(0, 6) + '..';
     const activeClass = isActive ? ' class="active-column-header"' : '';
-    html += `<th${activeClass}>${name.toUpperCase()}</th>`;
+    upperHtml += `<th${activeClass}>${name.toUpperCase()}</th>`;
   }
-  html += `</tr></thead>`;
+  upperHtml += `</tr></thead><tbody>`;
 
-  // Table Body
-  html += `<tbody>`;
-
-  // Upper Section Title Row
-  html += `<tr class="summary-row-tr"><td colspan="${pCount + 1}" style="text-align: left; color: var(--color-accent-gold); font-size: 11px; letter-spacing: 1.5px; font-weight: 900; background-color: rgba(30, 41, 59, 0.4);">UPPER SECTION</td></tr>`;
-
-  // Upper categories
   upperCategories.forEach(cat => {
-    html += renderCategoryRow(cat, pCount, activeIdx, hasRolled);
+    upperHtml += renderCategoryRow(cat, pCount, activeIdx, hasRolled);
   });
 
-  // Upper Section Subtotal
-  html += `<tr class="summary-row-tr"><td>Upper Subtotal</td>`;
+  upperHtml += `<tr class="summary-row-tr"><td>Subtotal</td>`;
   for (let i = 0; i < pCount; i++) {
     const isActive = i === activeIdx;
     const cellClass = isActive ? ' class="active-column-cell"' : '';
-    html += `<td${cellClass}>${engine.getUpperSectionSum(i)}</td>`;
+    upperHtml += `<td${cellClass}>${engine.getUpperSectionSum(i)}</td>`;
   }
-  html += `</tr>`;
+  upperHtml += `</tr>`;
 
-  // Upper Section Bonus
-  html += `<tr class="summary-row-tr"><td>Bonus (+35 if >= 63)</td>`;
+  upperHtml += `<tr class="summary-row-tr"><td>Bonus (+35)</td>`;
   for (let i = 0; i < pCount; i++) {
     const isActive = i === activeIdx;
     const cellClass = isActive ? ' class="active-column-cell"' : '';
-    html += `<td${cellClass}>+${engine.getUpperSectionBonus(i)}</td>`;
+    upperHtml += `<td${cellClass}>+${engine.getUpperSectionBonus(i)}</td>`;
   }
-  html += `</tr>`;
+  upperHtml += `</tr>`;
+  upperHtml += `</tbody></table>`;
 
-  // Lower Section Title Row
-  html += `<tr class="summary-row-tr"><td colspan="${pCount + 1}" style="text-align: left; color: var(--color-accent-gold); font-size: 11px; letter-spacing: 1.5px; font-weight: 900; background-color: rgba(30, 41, 59, 0.4);">LOWER SECTION</td></tr>`;
+  // Render Lower Section Table
+  let lowerHtml = `<table class="scorecard-table">`;
+  lowerHtml += `<thead><tr><th>LOWER SECTION</th>`;
+  for (let i = 0; i < pCount; i++) {
+    const isActive = i === activeIdx;
+    let name = engine.playerNames[i];
+    if (name.length > 8) name = name.substring(0, 6) + '..';
+    const activeClass = isActive ? ' class="active-column-header"' : '';
+    lowerHtml += `<th${activeClass}>${name.toUpperCase()}</th>`;
+  }
+  lowerHtml += `</tr></thead><tbody>`;
 
-  // Lower categories
   lowerCategories.forEach(cat => {
-    html += renderCategoryRow(cat, pCount, activeIdx, hasRolled);
+    lowerHtml += renderCategoryRow(cat, pCount, activeIdx, hasRolled);
   });
 
-  // Lower Section Subtotal
-  html += `<tr class="summary-row-tr"><td>Lower Subtotal</td>`;
+  lowerHtml += `<tr class="summary-row-tr"><td>Subtotal</td>`;
   for (let i = 0; i < pCount; i++) {
     const isActive = i === activeIdx;
     const cellClass = isActive ? ' class="active-column-cell"' : '';
-    html += `<td${cellClass}>${engine.getLowerSectionSum(i)}</td>`;
+    lowerHtml += `<td${cellClass}>${engine.getLowerSectionSum(i)}</td>`;
   }
-  html += `</tr>`;
+  lowerHtml += `</tr>`;
 
-  // Grand Total Row
-  html += `<tr class="summary-row-tr grand-total"><td>GRAND TOTAL</td>`;
+  lowerHtml += `<tr class="summary-row-tr grand-total"><td>GRAND TOTAL</td>`;
   for (let i = 0; i < pCount; i++) {
     const isActive = i === activeIdx;
     const cellClass = isActive ? ' class="active-column-cell grand-val"' : ' class="grand-val"';
-    html += `<td${cellClass}>${engine.getTotalScore(i)}</td>`;
+    lowerHtml += `<td${cellClass}>${engine.getTotalScore(i)}</td>`;
   }
-  html += `</tr>`;
+  lowerHtml += `</tr>`;
+  lowerHtml += `</tbody></table>`;
 
-  html += `</tbody></table>`;
-
-  tableContainer.innerHTML = html;
+  const playerClass = pCount > 2 ? 'many-players' : 'few-players';
+  tableContainer.innerHTML = `
+    <div class="scorecard-tables-flex ${playerClass}">
+      <div class="scorecard-table-wrapper upper-wrapper">
+        ${upperHtml}
+      </div>
+      <div class="scorecard-table-wrapper lower-wrapper">
+        ${lowerHtml}
+      </div>
+    </div>
+  `;
 }
 
 function renderCategoryRow(cat, pCount, activeIdx, hasRolled) {

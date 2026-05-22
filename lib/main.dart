@@ -616,18 +616,65 @@ class _GameScreenState extends State<GameScreen> {
     final int pCount = _engine.playerCount;
     final int activeIdx = _engine.activePlayerIndex;
     final bool hasRolled = _engine.rollsRemaining < 3;
+    final bool isCompact = MediaQuery.of(context).size.width < 500;
 
-    // Header cells
+    final categories = ScoringCategory.values;
+    final upperSection = categories.sublist(0, 6);
+    final lowerSection = categories.sublist(6);
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Upper Section Column
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildTableHeader('UPPER SECTION', pCount, activeIdx, isCompact),
+              const SizedBox(height: 6),
+              ...upperSection.map((cat) => _buildRowForCategory(cat, pCount, activeIdx, hasRolled)),
+              _buildRowForSummary('Subtotal', (idx) => '${_engine.getUpperSectionSum(idx)}', pCount, activeIdx),
+              _buildRowForSummary('Bonus (+35)', (idx) => '+${_engine.getUpperSectionBonus(idx)}', pCount, activeIdx),
+            ],
+          ),
+        ),
+        SizedBox(width: isCompact ? 6.0 : 12.0),
+        // Lower Section Column
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildTableHeader('LOWER SECTION', pCount, activeIdx, isCompact),
+              const SizedBox(height: 6),
+              ...lowerSection.map((cat) => _buildRowForCategory(cat, pCount, activeIdx, hasRolled)),
+              _buildRowForSummary('Subtotal', (idx) => '${_engine.getLowerSectionSum(idx)}', pCount, activeIdx),
+              _buildRowForSummary('GRAND TOTAL', (idx) => '${_engine.getTotalScore(idx)}', pCount, activeIdx, isGrand: true),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTableHeader(String title, int pCount, int activeIdx, bool isCompact) {
     final List<Widget> headerCells = [
-      const Expanded(
+      Expanded(
         flex: 3,
-        child: Text('CATEGORY', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 12)),
+        child: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.bold, 
+            color: Colors.grey, 
+            fontSize: isCompact ? 9 : 11
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
     ];
 
     for (int i = 0; i < pCount; i++) {
       final bool isActive = i == activeIdx;
-      // Abbreviate name if too long
       String name = _engine.playerNames[i];
       if (name.length > 8) name = '${name.substring(0, 6)}..';
 
@@ -636,18 +683,18 @@ class _GameScreenState extends State<GameScreen> {
           flex: 2,
           child: Container(
             alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+            padding: EdgeInsets.symmetric(vertical: isCompact ? 2 : 4, horizontal: 1),
             decoration: BoxDecoration(
               color: isActive ? const Color(0xFF4285F4).withOpacity(0.3) : Colors.transparent,
-              borderRadius: BorderRadius.circular(6),
-              border: isActive ? Border.all(color: const Color(0xFFFBBC05), width: 1.5) : null,
+              borderRadius: BorderRadius.circular(4),
+              border: isActive ? Border.all(color: const Color(0xFFFBBC05), width: 1.0) : null,
             ),
             child: Text(
               name,
               style: TextStyle(
                 fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                 color: isActive ? const Color(0xFFFBBC05) : Colors.grey,
-                fontSize: 11,
+                fontSize: isCompact ? 9 : 11,
               ),
               textAlign: TextAlign.center,
               maxLines: 1,
@@ -658,41 +705,13 @@ class _GameScreenState extends State<GameScreen> {
       );
     }
 
-    final categories = ScoringCategory.values;
-    final upperSection = categories.sublist(0, 6);
-    final lowerSection = categories.sublist(6);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Grid Table Headers
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1E293B),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(children: headerCells),
-        ),
-        const SizedBox(height: 8),
-
-        // Upper Section rows
-        ...upperSection.map((cat) => _buildRowForCategory(cat, pCount, activeIdx, hasRolled)),
-
-        // Upper Summary rows
-        _buildRowForSummary('Upper Subtotal', (idx) => '${_engine.getUpperSectionSum(idx)}', pCount, activeIdx),
-        _buildRowForSummary('Bonus (>= 63)', (idx) => '+${_engine.getUpperSectionBonus(idx)}', pCount, activeIdx),
-        
-        const SizedBox(height: 16),
-
-        // Lower Section rows
-        ...lowerSection.map((cat) => _buildRowForCategory(cat, pCount, activeIdx, hasRolled)),
-
-        // Lower Summary row
-        _buildRowForSummary('Lower Subtotal', (idx) => '${_engine.getLowerSectionSum(idx)}', pCount, activeIdx),
-        const Divider(color: Color(0xFF334155), thickness: 2, height: 20),
-        _buildRowForSummary('GRAND TOTAL', (idx) => '${_engine.getTotalScore(idx)}', pCount, activeIdx, isGrand: true),
-      ],
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: isCompact ? 6 : 8, horizontal: isCompact ? 6 : 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(children: headerCells),
     );
   }
 
@@ -749,6 +768,7 @@ class _GameScreenState extends State<GameScreen> {
     final IconData icon = _getCategoryIcon(category);
     final String instruction = _getCategoryInstruction(category);
     final String? diceFace = _getCategoryDiceFace(category);
+    final bool isCompact = MediaQuery.of(context).size.width < 500;
 
     final List<Widget> cells = [
       Expanded(
@@ -756,12 +776,14 @@ class _GameScreenState extends State<GameScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 18,
-              color: const Color(0xFF818CF8),
-            ),
-            const SizedBox(width: 8),
+            if (!isCompact || pCount <= 2) ...[
+              Icon(
+                icon,
+                size: isCompact ? 14 : 18,
+                color: const Color(0xFF818CF8),
+              ),
+              SizedBox(width: isCompact ? 4 : 6),
+            ],
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -770,18 +792,22 @@ class _GameScreenState extends State<GameScreen> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        label,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          color: Colors.white,
+                      Flexible(
+                        child: Text(
+                          label,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: (isCompact && pCount > 2) ? 10 : 12,
+                            color: Colors.white,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (diceFace != null) ...[
-                        const SizedBox(width: 6),
+                      if (diceFace != null && (!isCompact || pCount <= 2)) ...[
+                        const SizedBox(width: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                          padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 0.5),
                           decoration: BoxDecoration(
                             color: const Color(0xFF1E293B),
                             border: Border.all(color: const Color(0xFF475569), width: 1),
@@ -790,8 +816,8 @@ class _GameScreenState extends State<GameScreen> {
                           child: Text(
                             diceFace,
                             style: const TextStyle(
-                              color: Color(0xFFFACC15),
-                              fontSize: 12,
+                              color: Color(0xFFFBBC05),
+                              fontSize: 10,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -799,16 +825,18 @@ class _GameScreenState extends State<GameScreen> {
                       ],
                     ],
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    instruction,
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 10,
+                  if (!isCompact) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      instruction,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 9,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -828,7 +856,10 @@ class _GameScreenState extends State<GameScreen> {
       if (actualScore != null) {
         cellChild = Text(
           '$actualScore',
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          style: TextStyle(
+            fontWeight: FontWeight.bold, 
+            fontSize: isCompact ? 12 : 14
+          ),
           textAlign: TextAlign.center,
         );
       } else if (isActive && showPreview) {
@@ -838,16 +869,19 @@ class _GameScreenState extends State<GameScreen> {
           '$preview',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: const Color(0xFFFACC15).withOpacity(0.8),
+            color: const Color(0xFFFBBC05).withOpacity(0.8),
             fontStyle: FontStyle.italic,
-            fontSize: 13,
+            fontSize: isCompact ? 11 : 13,
           ),
           textAlign: TextAlign.center,
         );
       } else {
-        cellChild = const Text(
+        cellChild = Text(
           '-',
-          style: TextStyle(color: Color(0xFF475569)),
+          style: TextStyle(
+            color: const Color(0xFF475569),
+            fontSize: isCompact ? 12 : 14
+          ),
           textAlign: TextAlign.center,
         );
       }
@@ -859,7 +893,7 @@ class _GameScreenState extends State<GameScreen> {
             alignment: Alignment.center,
             padding: const EdgeInsets.symmetric(vertical: 4),
             decoration: BoxDecoration(
-              color: isActive ? const Color(0xFF6366F1).withOpacity(0.08) : Colors.transparent,
+              color: isActive ? const Color(0xFF4285F4).withOpacity(0.08) : Colors.transparent,
               borderRadius: BorderRadius.circular(4),
             ),
             child: cellChild,
@@ -873,11 +907,9 @@ class _GameScreenState extends State<GameScreen> {
       borderRadius: BorderRadius.circular(8),
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 2),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: isCompact ? 6 : 12, vertical: isCompact ? 5 : 8),
         decoration: BoxDecoration(
-          color: _engine.scorecards[activeIdx][category] != null 
-              ? Colors.transparent 
-              : Colors.transparent,
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isClickable && showPreview ? const Color(0xFF334155) : Colors.transparent,
@@ -890,6 +922,8 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Widget _buildRowForSummary(String label, String Function(int) scoreProvider, int pCount, int activeIdx, {bool isGrand = false}) {
+    final bool isCompact = MediaQuery.of(context).size.width < 500;
+
     final List<Widget> cells = [
       Expanded(
         flex: 3,
@@ -897,8 +931,8 @@ class _GameScreenState extends State<GameScreen> {
           label,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: isGrand ? const Color(0xFF818CF8) : Colors.white,
-            fontSize: isGrand ? 14 : 12,
+            color: isGrand ? const Color(0xFF4285F4) : Colors.white,
+            fontSize: isGrand ? (isCompact ? 12 : 14) : (isCompact ? 10 : 12),
           ),
         ),
       ),
@@ -915,8 +949,8 @@ class _GameScreenState extends State<GameScreen> {
             val,
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: isGrand ? const Color(0xFFFACC15) : Colors.white,
-              fontSize: isGrand ? 17 : 13,
+              color: isGrand ? const Color(0xFFFBBC05) : Colors.white,
+              fontSize: isGrand ? (isCompact ? 14 : 17) : (isCompact ? 11 : 13),
             ),
             textAlign: TextAlign.center,
           ),
@@ -926,11 +960,11 @@ class _GameScreenState extends State<GameScreen> {
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: isCompact ? 6 : 12, vertical: isCompact ? 6 : 10),
       decoration: BoxDecoration(
-        color: isGrand ? const Color(0xFF6366F1).withOpacity(0.12) : const Color(0xFF1E293B).withOpacity(0.6),
+        color: isGrand ? const Color(0xFF4285F4).withOpacity(0.12) : const Color(0xFF1E293B).withOpacity(0.6),
         borderRadius: BorderRadius.circular(8),
-        border: isGrand ? Border.all(color: const Color(0xFF6366F1), width: 1.2) : null,
+        border: isGrand ? Border.all(color: const Color(0xFF4285F4), width: 1.2) : null,
       ),
       child: Row(children: cells),
     );

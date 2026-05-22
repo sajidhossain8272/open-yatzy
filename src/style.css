@@ -148,13 +148,18 @@ header {
   justify-content: space-between;
   align-items: center;
   padding: 10px 0;
+  gap: 8px;
 }
 
 header h1 {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 900;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   color: var(--color-text-primary);
+  text-align: center;
+  flex-grow: 1;
+  white-space: nowrap;
+  margin: 0 !important;
 }
 
 .header-buttons {
@@ -571,4 +576,132 @@ canvas {
   background-color: rgba(99, 102, 241, 0.2);
   font-weight: bold;
   color: var(--color-accent-gold);
+}
+
+/* Scorecard Tables Side-by-Side Flex Layout */
+.scorecard-tables-flex {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  width: 100%;
+  align-items: flex-start;
+}
+
+.scorecard-table-wrapper {
+  flex: 1;
+  min-width: 0; /* Let columns shrink gracefully */
+  background-color: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+}
+
+/* General Mobile Responsiveness Overrides */
+@media (max-width: 600px) {
+  .app-container {
+    padding: 10px;
+    gap: 12px;
+  }
+
+  .canvas-container {
+    height: 140px; /* Compact canvas on mobile */
+    border-radius: 16px;
+  }
+
+  .scorecard-tables-flex {
+    gap: 8px;
+  }
+
+  .scorecard-table th {
+    padding: 8px 4px;
+    font-size: 10px;
+  }
+
+  .scorecard-table td {
+    padding: 8px 4px;
+    font-size: 11px;
+  }
+
+  .category-name {
+    font-size: 11px;
+  }
+
+  .category-row-icon {
+    font-size: 16px;
+    width: 20px;
+  }
+
+  .cell-value {
+    font-size: 12px;
+  }
+
+  .cell-value.preview {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 500px) {
+  /* On very narrow screens, hide instructions and die icons to preserve column widths */
+  .category-instruction {
+    display: none !important;
+  }
+
+  .inline-die-icon {
+    display: none !important;
+  }
+
+  .category-row-icon {
+    font-size: 14px;
+    width: 16px;
+  }
+
+  .category-label-container {
+    gap: 4px;
+  }
+
+  /* Specific settings for 3-4 players on small screens to prevent squeezing */
+  .scorecard-tables-flex.many-players .category-row-icon {
+    display: none !important;
+  }
+  
+  .scorecard-tables-flex.many-players .scorecard-table th,
+  .scorecard-tables-flex.many-players .scorecard-table td {
+    padding: 6px 2px;
+    font-size: 9.5px;
+  }
+
+  .scorecard-tables-flex.many-players .category-name {
+    font-size: 9.5px;
+  }
+}
+
+@media (max-width: 400px) {
+  header h1 {
+    font-size: 15px;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-header {
+    padding: 6px;
+    font-size: 18px;
+  }
+
+  .header-buttons {
+    gap: 4px;
+  }
+
+  .btn-roll {
+    padding: 10px 16px;
+    font-size: 12px;
+    border-radius: 12px;
+  }
+
+  .status-rolls {
+    font-size: 12px;
+  }
+
+  .status-desc {
+    font-size: 10px;
+  }
 }
