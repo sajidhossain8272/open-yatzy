@@ -111,23 +111,14 @@ class DiceComponent extends PositionComponent with TapCallbacks {
       canvas.drawRRect(rrect, glowPaint);
     }
 
-    // 3. Die Body (multi-color gradient based on index)
-    final List<Map<String, Color>> colors = [
-      { 'start': const Color(0xFF4285F4), 'end': const Color(0xFF1D5ABF) }, // Index 0: Google Blue
-      { 'start': const Color(0xFFEA4335), 'end': const Color(0xFFB32015) }, // Index 1: Google Red
-      { 'start': const Color(0xFFFBBC05), 'end': const Color(0xFFC99200) }, // Index 2: Google Yellow
-      { 'start': const Color(0xFF34A853), 'end': const Color(0xFF227336) }, // Index 3: Google Green
-      { 'start': const Color(0xFF8B5CF6), 'end': const Color(0xFF6333C7) }, // Index 4: Google Purple
-    ];
-    final pair = colors[index % colors.length];
-
+    // 3. Die Body (Ivory / Soft Cream gradient for a premium board game look)
     final bodyPaint = Paint()
       ..shader = ui.Gradient.linear(
         Offset(-size.x / 2, -size.y / 2),
         Offset(size.x / 2, size.y / 2),
-        [
-          pair['start']!,
-          pair['end']!,
+        const [
+          Color(0xFFFCF9F2), // Premium Ivory start
+          Color(0xFFEADFC9), // Soft cream/bone end
         ],
       );
     canvas.drawRRect(rrect, bodyPaint);
@@ -136,16 +127,16 @@ class DiceComponent extends PositionComponent with TapCallbacks {
     final borderPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = held ? 3.0 : 1.5
-      ..color = held ? const Color(0xFFFBBC05) : Colors.white.withOpacity(0.25);
+      ..color = held ? const Color(0xFFFBBC05) : const Color(0xFF1B3D2F).withOpacity(0.45);
     canvas.drawRRect(rrect, borderPaint);
 
-    // 5. Draw Pips (White dots with a tiny inner depth)
+    // 5. Draw Pips (Deep forest green pips matching felt background)
     final pipPaint = Paint()
-      ..color = Colors.white
+      ..color = const Color(0xFF0B1C15)
       ..style = PaintingStyle.fill;
       
     final pipDepthPaint = Paint()
-      ..color = const Color(0x40000000)
+      ..color = const Color(0x1A000000)
       ..style = PaintingStyle.fill;
 
     _drawPips(canvas, visualValue, size.x, pipPaint, pipDepthPaint);

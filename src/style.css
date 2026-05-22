@@ -1,13 +1,38 @@
-/* Premium Google RGB Theme Settings */
+/* Board Game Felt Theme Settings */
 :root {
-  --color-bg: #0B0F19;
-  --color-surface: #1E293B;
-  --color-border: #334155;
-  --color-text-primary: #F8FAFC;
-  --color-text-secondary: #94A3B8;
-  --color-accent-gold: #FBBC05;
-  --color-accent-indigo: #4285F4;
-  --color-accent-indigo-hover: #3367D6;
+  --color-bg: #061710; /* Darker green felt bottom */
+  --color-bg-gradient: radial-gradient(circle at center, #0F3323 0%, #061710 100%); /* Radial felt look */
+  --color-surface: #0E291D; /* Dark forest card surface */
+  --color-border: #183D2C; /* Rich green board borders */
+  --color-text-primary: #F4FBF7; /* Light vintage paper/ivory text */
+  --color-text-secondary: #8BA89B; /* Sage green secondary text */
+  --color-accent-gold: #FFC107; /* Primary Golden Yellow */
+  --color-accent-indigo: #FFC107; /* Yellow primary */
+  --color-accent-indigo-hover: #E0A800; /* Amber yellow hover */
+  --color-accent-secondary: #D32F2F; /* Premium deep crimson/burgundy */
+  --color-dice-bg-start: #FCF9F2; /* Premium Ivory start */
+  --color-dice-bg-end: #EADFC9; /* Soft cream/bone end */
+  --color-dice-pips: #061710; /* Deep green pips matching felt */
+  --color-dice-border: rgba(14, 41, 29, 0.45);
+  --color-btn-text: #061710; /* Dark forest text on yellow button to fix eye strain */
+}
+
+.light-theme {
+  --color-bg: #EAE6DF; /* Muted ivory bottom */
+  --color-bg-gradient: radial-gradient(circle at center, #F4F1EA 0%, #DCD6CD 100%); /* Warm linen gradient */
+  --color-surface: #FFFFFF; /* Crisp ivory cards */
+  --color-border: #D0C9BE; /* Muted sand borders */
+  --color-text-primary: #1C2E24; /* Deep forest slate text */
+  --color-text-secondary: #6A7B73; /* Sage/slate secondary text */
+  --color-accent-gold: #B58000; /* Darker amber gold for legibility on light background */
+  --color-accent-indigo: #B58000; 
+  --color-accent-indigo-hover: #946900;
+  --color-accent-secondary: #A8201A; /* Crimson accent */
+  --color-dice-bg-start: #FFFFFF; /* Elegant white start */
+  --color-dice-bg-end: #F5EFEB; /* Soft cream end */
+  --color-dice-pips: #1C2E24; /* Forest green pips */
+  --color-dice-border: #D0C9BE;
+  --color-btn-text: #FFFFFF; /* White text on dark amber button */
 }
 
 * {
@@ -21,6 +46,8 @@
 
 body {
   background-color: var(--color-bg);
+  background-image: var(--color-bg-gradient);
+  background-attachment: fixed;
   color: var(--color-text-primary);
   min-height: 100vh;
   display: flex;
@@ -88,7 +115,7 @@ body {
 
 .btn-count.active {
   background-color: var(--color-accent-indigo);
-  border-color: #818cf8;
+  border-color: var(--color-accent-gold);
   color: white;
 }
 
@@ -101,7 +128,7 @@ body {
 .input-field {
   background-color: var(--color-bg);
   border: 1.5px solid var(--color-border);
-  color: white;
+  color: var(--color-text-primary);
   padding: 12px;
   border-radius: 8px;
   font-size: 14px;
@@ -142,24 +169,41 @@ body {
   border-bottom: 2px solid var(--color-accent-gold);
 }
 
-/* Header bar */
 header {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 10px 0;
+  min-height: 48px;
   gap: 8px;
 }
 
+.header-brand {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--color-accent-gold);
+  box-shadow: 0 0 10px rgba(251, 188, 5, 0.3);
+}
+
 header h1 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 900;
   letter-spacing: 1.5px;
-  color: var(--color-text-primary);
-  text-align: center;
-  flex-grow: 1;
-  white-space: nowrap;
+  color: var(--color-accent-gold);
   margin: 0 !important;
+  white-space: nowrap;
 }
 
 .header-buttons {
@@ -232,9 +276,9 @@ canvas {
 
 .btn-roll {
   background: linear-gradient(135deg, var(--color-accent-indigo) 0%, var(--color-accent-indigo-hover) 100%);
-  border: 1.5px solid #818CF8;
+  border: 1.5px solid var(--color-accent-gold);
   border-radius: 16px;
-  color: white;
+  color: var(--color-btn-text);
   padding: 14px 24px;
   font-weight: bold;
   font-size: 14px;
@@ -243,19 +287,20 @@ canvas {
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 4px 12px rgba(251, 188, 5, 0.3);
   transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .btn-roll:active {
   transform: scale(0.95);
-  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 2px 6px rgba(251, 188, 5, 0.2);
 }
 
 .btn-roll:disabled {
-  background: #334155;
-  border-color: #475569;
-  color: #64748B;
+  background: var(--color-border);
+  border-color: var(--color-border);
+  color: var(--color-text-secondary);
+  opacity: 0.6;
   box-shadow: none;
   cursor: not-allowed;
 }
@@ -305,13 +350,13 @@ canvas {
 }
 
 .scorecard-table tr.category-row {
-  border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+  border-bottom: 1px solid var(--color-border);
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .scorecard-table tr.category-row.clickable:hover {
-  background-color: rgba(30, 41, 59, 0.3);
+  background-color: rgba(255, 193, 7, 0.08);
 }
 
 /* Category Row Label Layout styling */
@@ -363,7 +408,7 @@ canvas {
 }
 
 .scorecard-table tr.category-row.clickable.active-roll {
-  outline: 1.5px solid rgba(51, 65, 85, 0.6);
+  outline: 1.5px solid var(--color-border);
   border-radius: 8px;
 }
 
@@ -377,43 +422,45 @@ canvas {
 }
 
 .cell-value.preview {
-  color: rgba(250, 204, 21, 0.8);
+  color: var(--color-accent-gold);
+  opacity: 0.8;
   font-style: italic;
   font-size: 13px;
 }
 
 .cell-value.empty {
-  color: #475569;
+  color: var(--color-text-secondary);
+  opacity: 0.5;
 }
 
 .active-column-header {
-  background-color: rgba(99, 102, 241, 0.2) !important;
+  background-color: rgba(255, 193, 7, 0.15) !important;
   color: var(--color-accent-gold) !important;
   border: 1.5px solid var(--color-accent-gold) !important;
   border-radius: 6px;
 }
 
 .active-column-cell {
-  background-color: rgba(99, 102, 241, 0.06);
+  background-color: rgba(255, 193, 7, 0.04);
 }
 
 .summary-row-tr {
-  background-color: rgba(30, 41, 59, 0.6);
+  background-color: var(--color-border);
   font-weight: bold;
 }
 
 .summary-row-tr td {
   padding: 11px 12px;
-  color: white;
+  color: var(--color-text-primary);
 }
 
 .summary-row-tr.grand-total {
-  background-color: rgba(99, 102, 241, 0.12);
+  background-color: rgba(255, 193, 7, 0.15);
   border: 1.2px solid var(--color-accent-indigo);
 }
 
 .summary-row-tr.grand-total td {
-  color: var(--color-accent-indigo);
+  color: var(--color-text-primary);
   font-size: 14px;
 }
 
@@ -573,7 +620,7 @@ canvas {
 
 .ranking-item.winner {
   border: 1.5px solid var(--color-accent-gold);
-  background-color: rgba(99, 102, 241, 0.2);
+  background-color: rgba(255, 193, 7, 0.15);
   font-weight: bold;
   color: var(--color-accent-gold);
 }

@@ -74,24 +74,32 @@ export class DiceComponent {
 
     const hs = this.size / 2;
 
+    // Fetch dynamic colors from the page styles (allows dark/light theme switching!)
+    const bodyStyle = getComputedStyle(document.body);
+    const bgStart = bodyStyle.getPropertyValue('--color-dice-bg-start').trim() || '#FFD54F';
+    const bgEnd = bodyStyle.getPropertyValue('--color-dice-bg-end').trim() || '#FFB300';
+    const dicePips = bodyStyle.getPropertyValue('--color-dice-pips').trim() || '#091711';
+    const diceBorder = bodyStyle.getPropertyValue('--color-dice-border').trim() || 'rgba(255, 255, 255, 0.3)';
+    const goldAccent = bodyStyle.getPropertyValue('--color-accent-gold').trim() || '#FBBC05';
+
     // 1. Drop shadow (draw shifted round rect)
     ctx.save();
-    ctx.shadowColor = 'rgba(2, 6, 23, 0.6)';
-    ctx.shadowBlur = 10;
-    ctx.shadowOffsetX = 4;
-    ctx.shadowOffsetY = 8;
-    ctx.fillStyle = '#0b0f19';
+    ctx.shadowColor = 'rgba(2, 6, 23, 0.4)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetX = 3;
+    ctx.shadowOffsetY = 6;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
     ctx.beginPath();
     ctx.roundRect(-hs, -hs, this.size, this.size, 16);
     ctx.fill();
     ctx.restore();
 
-    // 2. Gold Glow outline when held
+    // 2. Glow outline when held
     if (this.held) {
       ctx.save();
-      ctx.shadowColor = 'rgba(251, 188, 5, 0.8)';
+      ctx.shadowColor = 'rgba(251, 188, 5, 0.6)';
       ctx.shadowBlur = 12;
-      ctx.strokeStyle = '#fbbc05';
+      ctx.strokeStyle = goldAccent;
       ctx.lineWidth = 3.0;
       ctx.beginPath();
       ctx.roundRect(-hs, -hs, this.size, this.size, 16);
@@ -99,19 +107,10 @@ export class DiceComponent {
       ctx.restore();
     }
 
-    // 3. Body (multi-color gradient based on index)
-    const colors = [
-      { start: '#4285F4', end: '#1D5ABF' }, // Index 0: Google Blue
-      { start: '#EA4335', end: '#B32015' }, // Index 1: Google Red
-      { start: '#FBBC05', end: '#C99200' }, // Index 2: Google Yellow
-      { start: '#34A853', end: '#227336' }, // Index 3: Google Green
-      { start: '#8B5CF6', end: '#6333C7' }  // Index 4: Google Violet/Purple
-    ];
-    
-    const pair = colors[this.index % colors.length];
+    // 3. Body (gradient matching the board game style)
     const grad = ctx.createLinearGradient(-hs, -hs, hs, hs);
-    grad.addColorStop(0, pair.start);
-    grad.addColorStop(1, pair.end);
+    grad.addColorStop(0, bgStart);
+    grad.addColorStop(1, bgEnd);
     
     ctx.fillStyle = grad;
     ctx.beginPath();
@@ -120,7 +119,7 @@ export class DiceComponent {
 
     // 4. Border stroke if not held
     if (!this.held) {
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+      ctx.strokeStyle = diceBorder;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.roundRect(-hs, -hs, this.size, this.size, 16);
@@ -128,24 +127,24 @@ export class DiceComponent {
     }
 
     // 5. Draw Pips
-    this._drawPips(ctx, this.visualValue, this.size);
+    this._drawPips(ctx, this.visualValue, this.size, dicePips);
 
     ctx.restore();
   }
 
-  _drawPips(ctx, value, size) {
+  _drawPips(ctx, value, size, dicePips) {
     const radius = size * 0.085;
     const offset = size * 0.25;
 
     function drawPip(x, y) {
       // 3D depth shadow under pip
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
       ctx.beginPath();
-      ctx.arc(x, y + 1.5, radius, 0, Math.PI * 2);
+      ctx.arc(x, y + 1.0, radius, 0, Math.PI * 2);
       ctx.fill();
 
       // Main pip
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = dicePips;
       ctx.beginPath();
       ctx.arc(x, y, radius, 0, Math.PI * 2);
       ctx.fill();

@@ -101,8 +101,41 @@ const lowerCategories = [
   ScoringCategory.CHANCE
 ];
 
+// Theme Icon Sync
+function updateThemeToggleIcons(theme) {
+  const iconName = theme === 'light' ? 'dark_mode' : 'light_mode';
+  const setupIcon = document.querySelector('#btn-theme-toggle-setup .material-symbols-outlined');
+  const gameIcon = document.querySelector('#btn-theme-toggle-game .material-symbols-outlined');
+  if (setupIcon) setupIcon.innerText = iconName;
+  if (gameIcon) gameIcon.innerText = iconName;
+}
+
 // Initialization
 function init() {
+  // Load and apply saved theme
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-theme');
+    updateThemeToggleIcons('light');
+  } else {
+    document.body.classList.remove('light-theme');
+    updateThemeToggleIcons('dark');
+  }
+
+  // Bind theme toggle buttons
+  const themeToggleSetup = document.getElementById('btn-theme-toggle-setup');
+  const themeToggleGame = document.getElementById('btn-theme-toggle-game');
+
+  const toggleTheme = () => {
+    const isLight = document.body.classList.toggle('light-theme');
+    const newTheme = isLight ? 'light' : 'dark';
+    localStorage.setItem('theme', newTheme);
+    updateThemeToggleIcons(newTheme);
+  };
+
+  if (themeToggleSetup) themeToggleSetup.addEventListener('click', toggleTheme);
+  if (themeToggleGame) themeToggleGame.addEventListener('click', toggleTheme);
+
   // Bind setup count selector
   setupCountSelector();
   updateNameInputs();

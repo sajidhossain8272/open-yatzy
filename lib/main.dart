@@ -15,16 +15,16 @@ class OpenYatzyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Open-Yatzy',
+      title: 'YATZY!',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0B0F19),
+        scaffoldBackgroundColor: const Color(0xFF0B1C15), // Board felt green
         colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF4285F4), // Google Blue
-          secondary: Color(0xFFFBBC05), // Google Yellow
-          surface: Color(0xFF1E293B), // Slate Surface
-          background: const Color(0xFF0B0F19),
+          primary: Color(0xFFFBBC05), // Amber Gold
+          secondary: Color(0xFFFBBC05),
+          surface: Color(0xFF162E24), // Rich forest green card
+          background: Color(0xFF0B1C15),
         ),
         fontFamily: 'Roboto',
       ),
@@ -266,8 +266,9 @@ class _GameScreenState extends State<GameScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0B0F19),
+        backgroundColor: const Color(0xFF0B1C15),
         elevation: 0,
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.grey),
           onPressed: () {
@@ -276,9 +277,24 @@ class _GameScreenState extends State<GameScreen> {
             });
           },
         ),
-        title: const Text(
-          'OPEN-YATZY',
-          style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.w900, color: Colors.white),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Image.asset(
+                'assets/images/logo.png',
+                height: 28,
+                width: 28,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'YATZY!',
+              style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.w900, color: Color(0xFFFBBC05)),
+            ),
+          ],
         ),
         actions: [
           IconButton(
@@ -320,19 +336,19 @@ class _GameScreenState extends State<GameScreen> {
             children: [
               // Active Player Handoff Indicator
               Container(
-                color: const Color(0xFF1E293B),
+                color: const Color(0xFF162E24),
                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.person, color: Color(0xFFFACC15), size: 18),
+                    const Icon(Icons.person, color: Color(0xFFFBBC05), size: 18),
                     const SizedBox(width: 8),
                     Text(
                       "TURN: ${_engine.playerNames[_engine.activePlayerIndex].toUpperCase()}",
                       style: const TextStyle(
                         fontWeight: FontWeight.w900,
                         letterSpacing: 1.5,
-                        color: Color(0xFFFACC15),
+                        color: Color(0xFFFBBC05),
                         fontSize: 14,
                       ),
                     ),
@@ -345,9 +361,9 @@ class _GameScreenState extends State<GameScreen> {
                 margin: const EdgeInsets.all(16),
                 height: 180,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
+                  color: const Color(0xFF162E24),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF334155), width: 1.5),
+                  border: Border.all(color: const Color(0xFF1B3D2F), width: 1.5),
                   boxShadow: const [
                     BoxShadow(
                       color: Color(0x33000000),
@@ -386,12 +402,12 @@ class _GameScreenState extends State<GameScreen> {
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF4285F4),
-                        foregroundColor: Colors.white,
+                        backgroundColor: const Color(0xFFFBBC05),
+                        foregroundColor: const Color(0xFF0B1C15),
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
-                          side: const BorderSide(color: Color(0xFF669DF6), width: 1.5),
+                          side: const BorderSide(color: Color(0xFFFDD835), width: 1.5),
                         ),
                         elevation: 4,
                       ),
@@ -444,7 +460,7 @@ class _GameScreenState extends State<GameScreen> {
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF4285F4).withOpacity(0.3),
+                            color: const Color(0xFFFBBC05).withOpacity(0.3),
                             blurRadius: 20,
                             spreadRadius: 2,
                           )
@@ -462,19 +478,25 @@ class _GameScreenState extends State<GameScreen> {
                     ),
                   ),
                   const Text(
-                    'OPEN-YATZY',
+                    'YATZY!',
                     style: TextStyle(
-                      fontSize: 36,
+                      fontSize: 42,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 4,
-                      color: Colors.white,
+                      color: Color(0xFFFBBC05),
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Open-Gaming Local Pass & Play',
-                    style: TextStyle(color: Colors.grey, fontSize: 16),
+                    'Play Local Multiplayer Without Ads',
+                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Open-Gaming is the parent name who builds open-source games without ads. Play Now Free!',
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 40),
@@ -483,16 +505,16 @@ class _GameScreenState extends State<GameScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
+                      color: const Color(0xFF162E24),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFF334155)),
+                      border: Border.all(color: const Color(0xFF1B3D2F)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
                           'Number of Players',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFFFACC15)),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFFFBBC05)),
                         ),
                         const SizedBox(height: 12),
                         Row(
@@ -509,10 +531,10 @@ class _GameScreenState extends State<GameScreen> {
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                                 decoration: BoxDecoration(
-                                  color: selected ? const Color(0xFF4285F4) : const Color(0xFF0F172A),
+                                  color: selected ? const Color(0xFFFBBC05) : const Color(0xFF0B1C15),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: selected ? const Color(0xFF669DF6) : const Color(0xFF334155),
+                                    color: selected ? const Color(0xFFFDD835) : const Color(0xFF1B3D2F),
                                     width: 1.5,
                                   ),
                                 ),
@@ -521,7 +543,7 @@ class _GameScreenState extends State<GameScreen> {
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 18,
-                                    color: selected ? Colors.white : Colors.grey,
+                                    color: selected ? const Color(0xFF0B1C15) : Colors.grey,
                                   ),
                                 ),
                               ),
@@ -537,16 +559,16 @@ class _GameScreenState extends State<GameScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
+                      color: const Color(0xFF162E24),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFF334155)),
+                      border: Border.all(color: const Color(0xFF1B3D2F)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
                           'Player Names',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFFFACC15)),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFFFBBC05)),
                         ),
                         const SizedBox(height: 12),
                         ...List.generate(_setupPlayerCount, (index) {
@@ -557,14 +579,14 @@ class _GameScreenState extends State<GameScreen> {
                               decoration: InputDecoration(
                                 labelText: 'Player ${index + 1} Name',
                                 filled: true,
-                                fillColor: const Color(0xFF0F172A),
+                                fillColor: const Color(0xFF0B1C15),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  borderSide: const BorderSide(color: Color(0xFF334155)),
+                                  borderSide: const BorderSide(color: Color(0xFF1B3D2F)),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  borderSide: const BorderSide(color: Color(0xFF4285F4)),
+                                  borderSide: const BorderSide(color: Color(0xFFFBBC05)),
                                 ),
                               ),
                             ),
@@ -578,14 +600,15 @@ class _GameScreenState extends State<GameScreen> {
                   // Start Match Button
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4285F4),
+                      backgroundColor: const Color(0xFFFBBC05),
+                      foregroundColor: const Color(0xFF0B1C15),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       elevation: 4,
                     ),
                     child: const Text(
                       'START MATCH',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.white),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.5),
                     ),
                     onPressed: () {
                       final List<String> names = [];
@@ -685,7 +708,7 @@ class _GameScreenState extends State<GameScreen> {
             alignment: Alignment.center,
             padding: EdgeInsets.symmetric(vertical: isCompact ? 2 : 4, horizontal: 1),
             decoration: BoxDecoration(
-              color: isActive ? const Color(0xFF4285F4).withOpacity(0.3) : Colors.transparent,
+              color: isActive ? const Color(0xFFFBBC05).withOpacity(0.15) : Colors.transparent,
               borderRadius: BorderRadius.circular(4),
               border: isActive ? Border.all(color: const Color(0xFFFBBC05), width: 1.0) : null,
             ),
@@ -708,7 +731,7 @@ class _GameScreenState extends State<GameScreen> {
     return Container(
       padding: EdgeInsets.symmetric(vertical: isCompact ? 6 : 8, horizontal: isCompact ? 6 : 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFF162E24),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(children: headerCells),
@@ -893,7 +916,7 @@ class _GameScreenState extends State<GameScreen> {
             alignment: Alignment.center,
             padding: const EdgeInsets.symmetric(vertical: 4),
             decoration: BoxDecoration(
-              color: isActive ? const Color(0xFF4285F4).withOpacity(0.08) : Colors.transparent,
+              color: isActive ? const Color(0xFFFBBC05).withOpacity(0.05) : Colors.transparent,
               borderRadius: BorderRadius.circular(4),
             ),
             child: cellChild,
@@ -912,7 +935,7 @@ class _GameScreenState extends State<GameScreen> {
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isClickable && showPreview ? const Color(0xFF334155) : Colors.transparent,
+            color: isClickable && showPreview ? const Color(0xFF1B3D2F) : Colors.transparent,
             width: 1,
           ),
         ),
@@ -931,7 +954,7 @@ class _GameScreenState extends State<GameScreen> {
           label,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: isGrand ? const Color(0xFF4285F4) : Colors.white,
+            color: isGrand ? const Color(0xFFFBBC05) : Colors.white,
             fontSize: isGrand ? (isCompact ? 12 : 14) : (isCompact ? 10 : 12),
           ),
         ),
@@ -962,9 +985,9 @@ class _GameScreenState extends State<GameScreen> {
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: EdgeInsets.symmetric(horizontal: isCompact ? 6 : 12, vertical: isCompact ? 6 : 10),
       decoration: BoxDecoration(
-        color: isGrand ? const Color(0xFF4285F4).withOpacity(0.12) : const Color(0xFF1E293B).withOpacity(0.6),
+        color: isGrand ? const Color(0xFFFBBC05).withOpacity(0.15) : const Color(0xFF162E24).withOpacity(0.6),
         borderRadius: BorderRadius.circular(8),
-        border: isGrand ? Border.all(color: const Color(0xFF4285F4), width: 1.2) : null,
+        border: isGrand ? Border.all(color: const Color(0xFFFBBC05), width: 1.2) : null,
       ),
       child: Row(children: cells),
     );
@@ -972,14 +995,14 @@ class _GameScreenState extends State<GameScreen> {
 
   Widget _buildLeaderboardDrawer() {
     return Drawer(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFF0B1C15),
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
               padding: const EdgeInsets.all(16),
-              color: const Color(0xFF1E293B),
+              color: const Color(0xFF162E24),
               child: const Row(
                 children: [
                   Icon(Icons.emoji_events, color: Color(0xFFFACC15), size: 28),
@@ -1011,7 +1034,7 @@ class _GameScreenState extends State<GameScreen> {
                           margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1E293B),
+                            color: const Color(0xFF162E24),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: rank <= 3 ? const Color(0xFFFACC15).withOpacity(0.3) : Colors.transparent,
